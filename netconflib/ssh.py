@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+"""SSH helper class.
+
+This class gives the ability to remotely execute comands via SSH.
+"""
+
 from paramiko import client
 
 class ssh:
@@ -10,6 +16,7 @@ class ssh:
         self.client.connect(address, username=username, password=password, look_for_keys=False)
 
     def sendCommand(self, command):
+        """Executes the command on the remote shell and prints the output."""
         if(self.client):
             stdin, stdout, stderr = self.client.exec_command(command)
             while not stdout.channel.exit_status_ready():
@@ -21,6 +28,6 @@ class ssh:
                         prevdata = stdout.channel.recv(1024)
                         alldata += prevdata
 
-                    print(str(alldata, "utf8"))
+                    print(str(alldata).encode("utf-8"))
         else:
             print("Connection not opened.")
