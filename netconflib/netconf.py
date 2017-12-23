@@ -28,8 +28,16 @@ password = config.get("authentication", "password")
 
 print("Testing connection to all specified nodes...")
 
-for node, addr in nodes:
-    connections.append(ssh.ssh(addr, username, password))
 
-for c in connections:
-    c.sendCommand(cmds.cmd_echo)
+try:
+    for node, addr in nodes:
+        connections.append(ssh.ssh(addr, username, password))
+except Exception as ex:
+    print(ex)
+    print("connection test failed. Exiting...")
+    exit(1)
+
+print("Successfully connected to all nodes.")
+
+#for c in connections:
+#    c.sendCommand(cmds.cmd_echo)

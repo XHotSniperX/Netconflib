@@ -10,7 +10,7 @@ class ssh:
     client = None
 
     def __init__(self, address, username, password):
-        print("Connecting to server.")
+        print("Connecting to server {}.".format(address))
         self.client = client.SSHClient()
         self.client.set_missing_host_key_policy(client.AutoAddPolicy())
         self.client.connect(address, username=username, password=password, look_for_keys=False)
