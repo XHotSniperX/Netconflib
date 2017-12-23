@@ -1,6 +1,7 @@
-import ConfigParser
+import configparser
 import io
 import ssh
+import commands
 
 # number of nodes
 numNodes = 0
@@ -12,13 +13,13 @@ connections = []
 username = ""
 password = ""
 
+cmds = commands.Commands()
+
 print("Starting linux network configuration...")
 
 # Load the configuration file
-with open("../config.ini") as f:
-    _config = f.read()
-config = ConfigParser.RawConfigParser(allow_no_value=True)
-config.readfp(io.BytesIO(_config))
+config = configparser.ConfigParser()
+config.read("../config.ini")
 
 nodes = config.items("hosts")
 numNodes = len(nodes)
@@ -31,6 +32,4 @@ for node, addr in nodes:
     connections.append(ssh.ssh(addr, username, password))
 
 for c in connections:
-    c.sendCommand("echo hello")
-
-cmd_ipforward = "sysctl -w net.ipv4.ip_forward=1"
+    c.sendCommand(cmds.cmd_echo)
