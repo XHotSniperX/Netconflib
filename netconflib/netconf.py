@@ -38,6 +38,7 @@ class NetConf:
         try:
             for node, addr in self.nodes:
                 self.connections.append(ssh(addr, self.username, self.password))
+                print(node, addr)
         except Exception as ex:
             print(ex)
             print("connection test failed. Exiting...")
@@ -45,8 +46,37 @@ class NetConf:
         print("Successfully connected to all nodes.")
 
     def enableIPForwarding(self):
+        """Enables ip packet forwarding on every node on the cluster."""
+        print("Enabling IP packet forwarding...")
         for c in self.connections:
             c.sendCommand(self.cmds.cmd_echo)
 
-    def configureRingTopology(self, parameter_list):
-        pass
+    def updateHostsFile(self):
+        """Adds all the ip addresses and host names to etc/hosts file. TODO implement"""
+        for i, c in enumerate(self.connections):
+            print("Node{}:".format(i+1))
+            for j in range(0, self.numNodes):
+                if j == i:
+                    print("127.0.1.1    {}".format(self.nodes[j][0]))
+                else:
+                    print("{}   {}".format(self.nodes[j][1], self.nodes[j][0]))
+
+    def configureRingTopology(self):
+        """Configures the cluster's network topology as a ring."""
+        for i, c in enumerate(self.connections):
+            #print("Node{}:".format(i+1))
+            for j in range(0, self.numNodes):
+                if j == i:
+                    continue
+                #print("route add -host {} gw {}".format(self.nodes[j][0], self.nodes[(i + 1) % (self.numNodes)][0]))
+                c.sendCommand("sudo route add -host {} gw {}".format(self.nodes[j][0], self.nodes[(i + 1) % (self.numNodes)][0]))
+
+    def removeRingTopology(self):
+        """Removes the ring netork topology from the cluster."""
+        for i, c in enumerate(self.connections):
+            #print("Node{}:".format(i+1))
+            for j in range(0, self.numNodes):
+                if j == i:
+                    continue
+                #print("route del -host {} gw {}".format(self.nodes[j][0], self.nodes[(i + 1) % (self.numNodes)][0]))
+                c.sendCommand("sudo route del -host {} gw {}".format(self.nodes[j][0], self.nodes[(i + 1) % (self.numNodes)][0]))
