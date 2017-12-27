@@ -56,14 +56,16 @@ class NetConf:
             c.sendCommand(self.cmds.cmd_echo)
 
     def updateHostsFile(self):
-        """Adds all the ip addresses and host names to etc/hosts file. TODO implement"""
+        """Appends all the ip addresses and host names to etc/hosts file."""
         for i, c in enumerate(self.connections):
-            self.logger.debug("Node{}:".format(i+1))
+            self.logger.debug("Node{}: Adding host entries to /etc/hosts file...".format(i+1))
             for j in range(0, self.numNodes):
                 if j == i:
                     self.logger.debug("127.0.1.1    {}".format(self.nodes[j][0]))
+                    c.sendCommand("echo '127.0.1.1    {}' | sudo tee -a /etc/hosts".format(self.nodes[j][0]))
                 else:
                     self.logger.debug("{}   {}".format(self.nodes[j][1], self.nodes[j][0]))
+                    c.sendCommand("echo '{}   {}' | sudo tee -a /etc/hosts".format(self.nodes[j][1], self.nodes[j][0]))
 
     def configureRingTopology(self):
         """Configures the cluster's network topology as a ring."""
