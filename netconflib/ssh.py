@@ -4,13 +4,16 @@
 This class gives the ability to remotely execute comands via SSH.
 """
 
+import logging
 from paramiko import client
 
 class ssh:
+    logger = None
     client = None
 
     def __init__(self, address, username, password):
-        print("Connecting to server {}.".format(address))
+        self.logger = logging.getLogger('app.netconflib.ssh')
+        self.logger.info("Connecting to server {}.".format(address))
         self.client = client.SSHClient()
         self.client.set_missing_host_key_policy(client.AutoAddPolicy())
         self.client.connect(address, username=username, password=password, look_for_keys=False)
@@ -28,6 +31,6 @@ class ssh:
                         prevdata = stdout.channel.recv(1024)
                         alldata += prevdata
 
-                    print(str(alldata).encode("utf-8"))
+                    self.logger.info(str(alldata).encode("utf-8"))
         else:
-            print("Connection not opened.")
+            self.logger.error("Connection not opened.")
