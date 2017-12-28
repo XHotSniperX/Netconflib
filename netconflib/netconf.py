@@ -103,3 +103,39 @@ class NetConf:
                     self.nodes[j][0], self.nodes[(i + 1) % (self.num_nodes)][0]))
                 c.send_command("sudo route del -host {} gw {}".format(
                     self.nodes[j][0], self.nodes[(i + 1) % (self.num_nodes)][0]))
+
+    def configure_star_topology(self, center, remove=False):
+        """Configures the cluster's network topology as a star.
+
+        The specified center node is configured as the star's center point
+        and is connected to every other node in a single hop.
+        All the other nodes have to first send their packets to the center node
+        where they are forwarded to the destination.
+
+        Arguments:
+            center {integer} -- [The center node's index.]
+            remove {boolean} -- [Remove the configuration. Default: False]
+        """
+
+        act = "add"
+        if remove:
+            act = "del"
+        for i, c in enumerate(self.connections):
+            self.logger.debug("Node{}:".format(i + 1))
+            if i == center:
+                self.logger.debug("Configuring node {} as center of the star topology.".format(i))
+                for j in range(0, self.num_nodes):
+                    if j == i:
+                        continue
+                    self.logger.debug("route {} -host {} gw {}".format(
+                        act, self.nodes[j][0], self.nodes[j][0]))
+                    c.send_command("sudo route {} -host {} gw {}".format(
+                        act, self.nodes[j][0], self.nodes[j][0]))
+            else:
+                for j in range(0, self.num_nodes):
+                    if j == i:
+                        continue
+                    self.logger.debug("route {} -host {} gw {}".format(
+                        act, self.nodes[j][0], self.nodes[center][0]))
+                    c.send_command("sudo route {} -host {} gw {}".format(
+                        act, self.nodes[j][0], self.nodes[center][0]))

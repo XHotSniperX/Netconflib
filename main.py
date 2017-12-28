@@ -28,6 +28,7 @@ LOGGER.addHandler(CH)
 
 
 NCL = NetConf("config.ini")
-NCL.enable_ip_forwarding()
+# NCL.enable_ip_forwarding()
 # NCL.configure_ring_topology()
-NCL.update_hosts_file()
+# NCL.update_hosts_file()
+NCL.configure_star_topology(0)
