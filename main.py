@@ -3,30 +3,31 @@ import argparse
 from netconflib.netconf import NetConf
 
 # parser
-parser = argparse.ArgumentParser(description='Network configurator.')
-parser.add_argument('-verbose', action='store_true',
-                   help='print debug information (default: only info and error)')
-parser.add_argument('--version', action='version', version='Netconf  v0.1')
-args = parser.parse_args()
+PARSER = argparse.ArgumentParser(description='Network configurator.')
+PARSER.add_argument('-verbose', action='store_true',
+                    help='print debug information (default: only info and error)')
+PARSER.add_argument('--version', action='version', version='Netconf  v0.1')
+ARGS = PARSER.parse_args()
 
 # logging configuration
-logger = logging.getLogger('app')
-logger.setLevel(logging.DEBUG)
-fh = logging.FileHandler('app.log')
-fh.setLevel(logging.DEBUG)
-ch = logging.StreamHandler()
-if args.verbose:
-    ch.setLevel(logging.DEBUG)
+LOGGER = logging.getLogger('app')
+LOGGER.setLevel(logging.DEBUG)
+FH = logging.FileHandler('app.log')
+FH.setLevel(logging.DEBUG)
+CH = logging.StreamHandler()
+if ARGS.verbose:
+    CH.setLevel(logging.DEBUG)
 else:
-    ch.setLevel(logging.ERROR)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-fh.setFormatter(formatter)
-ch.setFormatter(formatter)
-logger.addHandler(fh)
-logger.addHandler(ch)
+    CH.setLevel(logging.ERROR)
+FORMATTER = logging.Formatter(
+    '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+FH.setFormatter(FORMATTER)
+CH.setFormatter(FORMATTER)
+LOGGER.addHandler(FH)
+LOGGER.addHandler(CH)
 
 
-ncl = NetConf("config.ini")
-#ncl.enableIPForwarding()
-#ncl.configureRingTopology()
-ncl.updateHostsFile()
+NCL = NetConf("config.ini")
+NCL.enable_ip_forwarding()
+# NCL.configure_ring_topology()
+NCL.update_hosts_file()
