@@ -8,6 +8,7 @@ import configparser
 import logging
 from .ssh import SSH
 from .commands import Commands
+from treelib import Node, Tree
 
 
 class NetConf:
@@ -123,7 +124,8 @@ class NetConf:
         for i, c in enumerate(self.connections):
             self.logger.debug("Node{}:".format(i + 1))
             if i == center:
-                self.logger.debug("Configuring node {} as center of the star topology.".format(i))
+                self.logger.debug(
+                    "Configuring node {} as center of the star topology.".format(i))
                 for j in range(0, self.num_nodes):
                     if j == i:
                         continue
@@ -139,3 +141,40 @@ class NetConf:
                         act, self.nodes[j][0], self.nodes[center][0]))
                     c.send_command("sudo route {} -host {} gw {}".format(
                         act, self.nodes[j][0], self.nodes[center][0]))
+
+    def configure_tree_topology(self, root, degree=2, remove=False):
+        """Configures the cluster's network topology as a tree.
+
+        [description]
+
+        Arguments:
+            root {[type]} -- [description]
+
+        Keyword Arguments:
+            degree {[type]} -- [description] (default: {2})
+            remove {[type]} -- [description] (default: {False})
+        """
+
+        act = "add"
+        if remove:
+            act = "del"
+
+        tree = Tree()
+        tree.create_node(self.nodes[root][0], root)
+        last_node = root
+        for i in range(self.num_nodes):
+            if i == root:
+                continue
+            if len(tree.children(last_node)) < degree:
+                tree.create_node(self.nodes[i][0], i, last_node)
+            elif last_node == root and root != 0:
+                last_node = 0
+                tree.create_node(self.nodes[i][0], i, last_node)
+            elif last_node + 1 == root:
+                last_node += 2
+                tree.create_node(self.nodes[i][0], i, last_node)
+            else:
+                last_node += 1
+                tree.create_node(self.nodes[i][0], i, last_node)
+
+        tree.show()
