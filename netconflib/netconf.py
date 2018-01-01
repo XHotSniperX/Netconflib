@@ -54,9 +54,8 @@ class NetConf:
                     SSH(addr, self.username, self.password))
         except Exception as ex:
             self.logger.error(ex)
-            self.logger.error("connection test failed. Exiting...")
-            exit(1)
-        self.logger.info("Successfully connected to all nodes.")
+            self.logger.error("connection test failed with {}.".format(node))
+        self.logger.info("Connection test finished.")
 
     def enable_ip_forwarding(self):
         """Enables ip packet forwarding on every node on the cluster."""
