@@ -113,8 +113,8 @@ class NetConf:
         where they are forwarded to the destination.
 
         Arguments:
-            center {integer} -- [The center node's index.]
-            remove {boolean} -- [Remove the configuration. Default: False]
+            center {integer} -- The center node's index.
+            remove {boolean} -- Remove the configuration (default: {False})
         """
 
         act = "add"
@@ -144,14 +144,16 @@ class NetConf:
     def configure_tree_topology(self, root, degree=2, remove=False):
         """Configures the cluster's network topology as a tree.
 
-        [description]
+        The tree consists of the specified root node and the nodes,
+        which build the subtrees. The childrens are incrementally chosen,
+        in other words, sequentially as specified in the config file.
 
         Arguments:
-            root {[type]} -- [description]
+            root {integer} -- The tree's root node.
 
         Keyword Arguments:
-            degree {[type]} -- [description] (default: {2})
-            remove {[type]} -- [description] (default: {False})
+            degree {integer} -- The maximum number of children (default: {2})
+            remove {boolean} -- Remove the configuration (default: {False})
         """
 
         act = "add"
@@ -176,4 +178,26 @@ class NetConf:
                 last_node += 1
                 tree.create_node(self.nodes[i][0], i, last_node)
 
+        self.logger.info("The following tree will be configured:")
         tree.show()
+
+        for i, c in enumerate(self.connections):
+            self.logger.debug("Node{}:".format(i + 1))
+            subtree = tree.subtree(i)
+            for j in range(self.num_nodes):
+                if i == j:
+                    continue
+                if subtree.contains(j):
+                    children = tree.children(i)
+                    for child in children:
+                        if child.identifier == j or tree.is_ancestor(child.identifier, j):
+                            self.logger.debug("route {} -host {} gw {}".format(
+                                act, self.nodes[j][0], self.nodes[child.identifier][0]))
+                            c.send_command("route {} -host {} gw {}".format(
+                                act, self.nodes[j][0], self.nodes[child.identifier][0]))
+                            break
+                elif tree.parent(i) != None:
+                    self.logger.debug("route {} -host {} gw {}".format(
+                        act, self.nodes[j][0], self.nodes[tree.parent(i).identifier][0]))
+                    c.send_command("route {} -host {} gw {}".format(
+                        act, self.nodes[j][0], self.nodes[tree.parent(i).identifier][0]))

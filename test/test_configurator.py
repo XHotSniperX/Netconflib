@@ -11,9 +11,6 @@ class TestConfigurationMethods(unittest.TestCase):
     def setUp(self):
         self.ncl = NetConf("test/config.ini")
 
-    def test_foo(self):
-        self.assertEqual('foo'.upper(), 'FOO')
-
     def test_tree(self):
         try:
             self.ncl.configure_tree_topology(0, 2, False)
