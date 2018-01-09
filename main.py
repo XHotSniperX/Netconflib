@@ -6,7 +6,7 @@ from netconflib.netconf import NetConf
 PARSER = argparse.ArgumentParser(description='Network configurator.')
 PARSER.add_argument('-verbose', action='store_true',
                     help='print debug information (default: only info and error)')
-PARSER.add_argument('--version', action='version', version='Netconf  v0.1')
+PARSER.add_argument('--version', action='version', version='Netconf  v0.2')
 ARGS = PARSER.parse_args()
 
 # logging configuration

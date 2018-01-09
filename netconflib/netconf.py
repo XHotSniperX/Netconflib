@@ -62,6 +62,7 @@ class NetConf:
 
     def enable_ip_forwarding(self):
         """Enables ip packet forwarding on every node on the cluster."""
+
         self.logger.info("Enabling IP packet forwarding...")
         for c in self.connections:
             if not self.testing:
@@ -69,6 +70,7 @@ class NetConf:
 
     def update_hosts_file(self):
         """Appends all the ip addresses and host names to etc/hosts file."""
+
         for i in range(self.num_nodes):
             self.logger.debug(
                 "Node{}: Adding host entries to /etc/hosts file...".format(i + 1))
@@ -86,31 +88,32 @@ class NetConf:
                         self.connections[i].send_command(
                             "echo '{}   {}' | sudo tee -a /etc/hosts".format(self.nodes[j][1], self.nodes[j][0]))
 
-    def configure_ring_topology(self):
-        """Configures the cluster's network topology as a ring."""
-        for i in range(self.num_nodes):
-            self.logger.debug("Node{}:".format(i + 1))
-            for j in range(0, self.num_nodes):
-                if j == i:
-                    continue
-                self.logger.debug("sudo route add -host {} gw {}".format(
-                    self.nodes[j][0], self.nodes[(i + 1) % (self.num_nodes)][0]))
-                if not self.testing:
-                    self.connections[i].send_command("sudo route add -host {} gw {}".format(
-                        self.nodes[j][0], self.nodes[(i + 1) % (self.num_nodes)][0]))
+    def configure_ring_topology(self, remove=False):
+        """Configures the cluster's network topology as a ring.
 
-    def remove_ring_topology(self):
-        """Removes the ring netork topology from the cluster."""
+        The nodes communicate logically in a ring topology.
+        Each node forwards the packet to the next node in the ring
+        until the packet arrives at its desired destination.
+        The ring is built incrementally as specified in the config file.
+        The forwarding direction is always clockwise.
+
+        Keyword Arguments:
+            remove {boolean} -- Remove the configuration (default: {False})
+        """
+
+        act = "add"
+        if remove:
+            act = "del"
         for i in range(self.num_nodes):
             self.logger.debug("Node{}:".format(i + 1))
             for j in range(0, self.num_nodes):
                 if j == i:
                     continue
-                self.logger.debug("sudo route del -host {} gw {}".format(
-                    self.nodes[j][0], self.nodes[(i + 1) % (self.num_nodes)][0]))
+                self.logger.debug("sudo route {} -host {} gw {}".format(
+                    act, self.nodes[j][0], self.nodes[(i + 1) % (self.num_nodes)][0]))
                 if not self.testing:
-                    self.connections[i].send_command("sudo route del -host {} gw {}".format(
-                        self.nodes[j][0], self.nodes[(i + 1) % (self.num_nodes)][0]))
+                    self.connections[i].send_command("sudo route {} -host {} gw {}".format(
+                        act, self.nodes[j][0], self.nodes[(i + 1) % (self.num_nodes)][0]))
 
     def configure_star_topology(self, center, remove=False):
         """Configures the cluster's network topology as a star.
@@ -213,3 +216,46 @@ class NetConf:
                     if not self.testing:
                         self.connections[i].send_command("sudo route {} -host {} gw {}".format(
                             act, self.nodes[j][0], self.nodes[tree.parent(i).identifier][0]))
+
+class Node:
+    """This class provides the functionality of a node.
+    """
+
+    # logger
+    logger = None
+
+    name = ""
+    id = 0
+    connection = None
+    forwarding_table = {}
+
+    def __init__(self, name, id):
+        self.logger = logging.getLogger('app.netconflib.Node')
+        self.name = name
+        self.id = id
+
+    def add_forwarding(self, dest_node, next_node):
+        """Adds a forwarding entry to the table.
+
+        Arguments:
+            dest_node {Node} -- The destination node.
+            next_node {Node} -- The next node to forward to.
+        """
+
+        self.forwarding_table.update({dest_node:next_node})
+
+class Topology:
+    """This class holds the topology of the cluster.
+    """
+
+    # logger
+    logger = None
+
+    topology_type = None
+    num_nodes = 0
+    nodes = []
+
+    def __init__(self, topology_type, num_nodes):
+        self.logger = logging.getLogger('app.netconflib.Topology')
+        self.topology_type = topology_type
+        self.num_nodes = num_nodes

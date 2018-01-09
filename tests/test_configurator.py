@@ -9,7 +9,7 @@ class TestConfigurationMethods(unittest.TestCase):
     ncl = None
 
     def setUp(self):
-        self.ncl = NetConf("test/config.ini")
+        self.ncl = NetConf("tests/config.ini")
 
     def test_tree(self):
         try:
