@@ -18,7 +18,7 @@ class SSH:
 
     def __init__(self, address, username, password):
         self.logger = logging.getLogger('app.netconflib.ssh')
-        self.logger.info("Connecting to server {}.".format(address))
+        self.logger.info("Connecting to server %s.", address)
         self.client = client.SSHClient()
         self.client.set_missing_host_key_policy(client.AutoAddPolicy())
         self.client.connect(address, username=username,
@@ -35,7 +35,7 @@ class SSH:
         """
 
         if self.client:
-            stdin, stdout, stderr = self.client.exec_command(command)
+            _, stdout, _ = self.client.exec_command(command)
             while not stdout.channel.exit_status_ready():
                 # Print data when available
                 if stdout.channel.recv_ready():
