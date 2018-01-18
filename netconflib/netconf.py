@@ -43,6 +43,7 @@ class NetConf:
         password = self.config.get("authentication", "password")
         self.types = TopologyTypes()
         self.topology = Topology(None, num_nodes, username, password)
+        self.topology.clean_up()
         self.topology.add_nodes_from_list(nodes)
 
         self.testing = self.config.get("settings", "testing")
@@ -145,18 +146,18 @@ class NetConf:
         tree = Tree()
         root_node = self.topology.get_node(root)
         tree.create_node(root_node.name, root_node.node_id)
-        last_node = root
+        parent_node = root
         for nodex in self.topology.nodes:
             if nodex.node_id == root_node.node_id:
                 continue
-            if len(tree.children(last_node)) >= degree:
-                if last_node == root and root != 0:
-                    last_node = 0
-                elif last_node + 1 == root:
-                    last_node += 2
+            if len(tree.children(parent_node)) >= degree:
+                if parent_node == root and root != 0:
+                    parent_node = 0
+                elif parent_node + 1 == root:
+                    parent_node += 2
                 else:
-                    last_node += 1
-            tree.create_node(nodex.name, nodex.node_id, last_node)
+                    parent_node += 1
+            tree.create_node(nodex.name, nodex.node_id, parent_node)
 
         self.logger.info("The following tree will be configured:")
         tree.show()
@@ -298,6 +299,12 @@ class Topology:
         for i, node in enumerate(nodes):
             new_node = Node(i, node[0], node[1])
             self.nodes.append(new_node)
+
+    def clean_up(self):
+        """Clears the variables.
+        """
+
+        self.nodes.clear()
 
     def get_node(self, node_id):
         """Returns the node that matches the specified id.
