@@ -4,6 +4,7 @@ import logging
 import configparser
 sys.path.append('../netconflib')
 from netconflib.netconf import NetConf
+from collections import Counter
 
 
 class TestConfigurationMethods(unittest.TestCase):
@@ -37,8 +38,13 @@ class TestConfigurationMethods(unittest.TestCase):
                             num_nodes, degree, root)
                         self.init_configurator(num_nodes)
                         self.ncl.configure_tree_topology(root, degree, False)
-                        self.assertEqual(len(self.ncl.topology.nodes), num_nodes)
-
+                        self.assertEqual(
+                            len(self.ncl.topology.nodes), num_nodes)
+                        for node in self.ncl.topology.nodes:
+                            unique_gateways = len(
+                                set(node.get_all_gateways()))
+                            assert unique_gateways <= degree + \
+                                1, "Node has more unique gateways than the tree's degree + parent!"
 
     def init_configurator(self, node_count):
         """Initializes the NetConf object
@@ -62,6 +68,7 @@ class TestConfigurationMethods(unittest.TestCase):
         self.config.write(config_file)
         config_file.close()
         self.ncl = NetConf(self.CONFIG_PATH)
+
 
 if __name__ == '__main__':
     LOGGER = logging.getLogger('test')

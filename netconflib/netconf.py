@@ -269,6 +269,27 @@ class Node:
         else:
             raise ValueError
 
+    def clean_up(self):
+        """Clears variables.
+        """
+
+        if self.connection != None:
+            self.connection.client.close()
+        self.forwarding_table.clear()
+        self.hosts.clear()
+
+    def get_all_gateways(self):
+        """Return all gateway addresses of this node.
+
+        Returns:
+            list -- List of gateway addresses.
+        """
+
+        gws = []
+        for node in self.forwarding_table.values():
+            gws.append(node.address)
+        return gws
+
 class Topology:
     """This class holds the topology of the cluster.
     """
@@ -304,6 +325,8 @@ class Topology:
         """Clears the variables.
         """
 
+        for node in self.nodes:
+            node.clean_up()
         self.nodes.clear()
 
     def get_node(self, node_id):
