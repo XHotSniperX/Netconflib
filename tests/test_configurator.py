@@ -46,7 +46,27 @@ class TestConfigurationMethods(unittest.TestCase):
                             assert unique_gateways <= degree + \
                                 1, "Node has more unique gateways than the tree's degree + parent!"
 
-    def init_configurator(self, node_count):
+    def test_hosts_updater(self):
+        """Tests whether the hosts are set correctly.
+        """
+
+        self.init_configurator(self.MAX_NUM)
+        self.ncl.update_hosts_file()
+
+        nodes = self.config.items("hosts")
+        hosts = {}
+        for name, addr in nodes:
+            hosts[name] = addr
+        num = len(hosts)
+
+        for node in self.ncl.topology.nodes:
+            self.assertEqual(len(node.hosts), num)
+            to_test = {}
+            for host in node.hosts:
+                to_test[host.name] = host.address
+            self.assertDictEqual(hosts, to_test)
+
+    def init_configurator(self, node_count, testing=True):
         """Initializes the NetConf object
         with the desired number of nodes on the cluster.
 
@@ -58,6 +78,10 @@ class TestConfigurationMethods(unittest.TestCase):
         config_file = open(self.CONFIG_PATH, "r")
         self.config.read_file(config_file)
         config_file.close()
+        if testing:
+            self.config.set("settings", "testing", "yes")
+        else:
+            self.config.set("settings", "testing", "no")
         self.config.remove_section("hosts")
         self.config.add_section("hosts")
         for i in range(node_count):

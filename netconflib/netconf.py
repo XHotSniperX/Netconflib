@@ -20,17 +20,6 @@ class NetConf:
     of a Linux cluster.
     """
 
-    # logger
-    logger = None
-
-    # topology
-    types = None
-    topology = None
-
-    cmds = None
-    config = None
-    testing = False
-
     def __init__(self, configfile):
         self.logger = logging.getLogger('app.netconflib.NetConf')
         self.logger.info("Starting linux network configuration...")
@@ -65,10 +54,7 @@ class NetConf:
 
         for nodex in self.topology.nodes:
             for nodey in self.topology.nodes:
-                if nodex.node_id == nodey.node_id:
-                    nodex.add_host("127.0.1.1", nodey.name)
-                else:
-                    nodex.add_host(nodey.address, nodey.name)
+                nodex.add_host(nodey)
 
         if not self.testing:
             self.topology.send_all_hosts()
@@ -187,21 +173,14 @@ class Node:
     """This class provides the functionality of a node.
     """
 
-    # logger
-    logger = None
-
-    node_id = 0
-    name = ""
-    address = ""
-    connection = None
-    forwarding_table = {}
-    hosts = {}
-
     def __init__(self, node_id, name, address):
         self.logger = logging.getLogger('app.netconflib.Node')
         self.node_id = node_id
         self.name = name
         self.address = address
+        self.connection = None
+        self.forwarding_table = {}
+        self.hosts = []
 
     def add_forwarding(self, dest_node, next_node):
         """Adds a forwarding entry to the table.
@@ -215,16 +194,15 @@ class Node:
                           , self.name, dest_node.name, next_node.name)
         self.forwarding_table.update({dest_node: next_node})
 
-    def add_host(self, address, name):
-        """Adds the specified host entry to the node's hosts.
+    def add_host(self, node):
+        """Adds the specified node to the node's hosts.
 
         Arguments:
-            address {string} -- The host's address.
-            name {string} -- The host's name.
+            node {Node} -- The node to be added.
         """
 
-        self.logger.debug("%s: Adding %s %s to hosts.", self.name, address, name)
-        self.hosts.update({address: name})
+        self.logger.debug("%s: Adding %s to hosts.", self.name, node.name)
+        self.hosts.append(node)
 
     def send_forwarding_table(self, remove=False):
         """Sends and writes the forwarding entries of this node
@@ -249,7 +227,11 @@ class Node:
         """Sends and writes the hosts on the node's hosts file.
         """
 
-        for addr, name in self.hosts:
+        for node in self.hosts:
+            name = node.name
+            addr = node.address
+            if self.node_id == node.node_id:
+                addr = "127.0.0.1"
             self.logger.debug("%s: echo '%s    %s' | sudo tee -a /etc/hosts", self.name, addr, name)
             self.connection.send_command(
                 "echo '{}    {}' | sudo tee -a /etc/hosts".format(addr, name))
@@ -294,21 +276,13 @@ class Topology:
     """This class holds the topology of the cluster.
     """
 
-    # logger
-    logger = None
-
-    topology_type = None
-    num_nodes = 0
-    nodes = []
-    username = ""
-    password = ""
-
     def __init__(self, topology_type, num_nodes, username, password):
         self.logger = logging.getLogger('app.netconflib.Topology')
         self.topology_type = topology_type
         self.num_nodes = num_nodes
         self.username = username
         self.password = password
+        self.nodes = []
 
     def add_nodes_from_list(self, nodes):
         """Adds new nodes to the topology out of a list of (name, address) tuples.
