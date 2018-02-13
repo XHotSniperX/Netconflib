@@ -8,3 +8,5 @@ class Commands:
 
     cmd_echo = "echo hello"
     cmd_ipforward = "sysctl -w net.ipv4.ip_forward=1"
+    cmd_check_key = "grep -q '{}' ~/.ssh/authorized_keys && echo $?"
+    cmd_generate_ed25519_key = 'ssh-keygen -f {} -t ed25519 -N ""'

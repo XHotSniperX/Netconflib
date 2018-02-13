@@ -4,6 +4,7 @@
 Use this library to conveniently configure the network topology of a linux cluster.
 """
 
+import os
 import configparser
 import logging
 from treelib import Tree
@@ -35,7 +36,7 @@ class NetConf:
         self.topology.clean_up()
         self.topology.add_nodes_from_list(nodes)
 
-        self.testing = self.config.get("settings", "testing")
+        self.testing = self.config.getboolean("settings", "testing")
 
         if not self.testing:
             self.topology.create_all_connections()
@@ -168,6 +169,25 @@ class NetConf:
 
         if not self.testing:
             self.topology.send_forwarding_tables(remove)
+
+    def open_shells(self):
+        """Starts system shells and establishes SSH to all nodes.
+        This is a helper method, to automatically start SSH sessions.
+        """
+
+        for node in self.topology.nodes:
+            os.system("start cmd /c ssh -i {} pi@{}"
+                  .format(os.path.abspath(SSH.PRIVATE_KEY_FILE),
+                  node.address))
+
+    def open_shell(self, id):
+        """Starts system shell and establishes SSH to specified node.
+        This is a helper method, to automatically start SSH sessions.
+        """
+
+        os.system("start cmd /c ssh -i {} pi@{}"
+                .format(os.path.abspath(SSH.PRIVATE_KEY_FILE),
+                self.topology.get_node(id).address))
 
 class Node:
     """This class provides the functionality of a node.
@@ -330,7 +350,7 @@ class Topology:
         except (ValueError, BadHostKeyException, AuthenticationException, SSHException) as ex:
             self.logger.error(ex)
             self.logger.error("connection failed with %s.", node.name)
-        self.logger.info("Connections established.")
+        self.logger.info("Connections setup done.")
 
     def send_forwarding_tables(self, remove=False):
         """Calls every node object on the cluster to send their forwarding table.
