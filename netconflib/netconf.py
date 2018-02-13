@@ -237,7 +237,7 @@ class Node:
             act = "del"
 
         self.logger.debug("%s:", self.name)
-        for dest, next_node in self.forwarding_table:
+        for dest, next_node in self.forwarding_table.items():
             self.logger.debug(
                 "sudo route %s -host %s gw %s", act, dest.name, next_node.name)
             self.connection.send_command(

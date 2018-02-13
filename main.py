@@ -13,11 +13,25 @@ class Main(object):
 
         # parser
         parser = argparse.ArgumentParser(description='Network configurator.')
-        parser.add_argument('-verbose', action='store_true',
+        parser.add_argument('--verbose', action='store_true',
                             help='print debug information (default: only info and error)')
         parser.add_argument('-sniff', action='store_true',
                             help='print packets on the network interface')
-        parser.add_argument('--version', action='version', version='Netconf  v0.2')
+        parser.add_argument('-shells', action='store_true',
+                            help='open shells to all cluster nodes')
+        parser.add_argument('-shell', nargs=1, type=int,
+                            help="open shell to cluster node with id")
+        parser.add_argument('-ipforward', action='store_true',
+                            help="enable ip forwarding on every node of the cluster")
+        parser.add_argument('-updatehosts', action='store_true',
+                            help="updates the hosts file of every node of the cluster")
+        parser.add_argument('-ring', action='store_true',
+                            help="configure the cluster's network topology as a ring")
+        parser.add_argument('-star', action='store_true',
+                            help="configure the cluster's network topology as a star")
+        parser.add_argument('-tree', nargs=2, type=int,
+                            help="configure the cluster's network topology as a tree (-tree <root> <degree>")
+        parser.add_argument('--version', action='version', version='Netconf  v0.3')
         args = parser.parse_args()
 
         # logging configuration
@@ -42,12 +56,22 @@ class Main(object):
             sniffer.sniff_ethernet()
         else:
             ncl = NetConf("config.ini")
-            # ncl.enable_ip_forwarding()
-            # ncl.configure_ring_topology()
-            # ncl.update_hosts_file()
-            # ncl.configure_star_topology(0)
-            # ncl.configure_tree_topology(3, 1, True)
-            ncl.open_shells()
+            if args.shells:
+                ncl.open_shells()
+            elif args.shell is not None:
+                ncl.open_shell(args.shell[0])
+            elif args.ipforward:
+                ncl.enable_ip_forwarding()
+            elif args.updatehosts:
+                ncl.update_hosts_file()
+            elif args.ring:
+                ncl.configure_ring_topology()
+            elif args.star:
+                ncl.configure_star_topology(0)
+            elif args.tree is not None:
+                root = args.tree[0]
+                degree = args.tree[1]
+                ncl.configure_tree_topology(root, degree)
 
 if __name__ == '__main__':
     Main().run()
