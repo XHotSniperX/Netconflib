@@ -1,4 +1,6 @@
 # netconflib
+[![PyPI version](https://badge.fury.io/py/netconflib.svg)](https://badge.fury.io/py/netconflib)
+[![HitCount](http://hits.dwyl.io/xhotsniperx/Netconflib.svg)](http://hits.dwyl.io/xhotsniperx/Netconflib)
 A library for configuring the network topology of a Linux  cluster
 
 ## Zusammenfassung
