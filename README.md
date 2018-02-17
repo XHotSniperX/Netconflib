@@ -1,6 +1,7 @@
 # netconflib
 [![build](https://travis-ci.org/XHotSniperX/Netconflib.svg?branch=master)](https://travis-ci.org/XHotSniperX/Netconflib)
 [![PyPI version](https://badge.fury.io/py/netconflib.svg)](https://badge.fury.io/py/netconflib)
+[![codecov](https://codecov.io/gh/XHotSniperX/Netconflib/branch/master/graph/badge.svg)](https://codecov.io/gh/XHotSniperX/Netconflib)
 [![HitCount](http://hits.dwyl.io/xhotsniperx/Netconflib.svg)](http://hits.dwyl.io/xhotsniperx/Netconflib)
 [![license](https://img.shields.io/badge/license-GPLv3-blue.svg)](LICENSE)
 [![platform](https://img.shields.io/badge/platform-Windows%2010%2C%20macOS%2C%20Linux-blue.svg)]()
