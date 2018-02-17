@@ -1,3 +1,3 @@
 paramiko>=2.4.0
-scapy-python3>=2.4
+scapy --pre
 treelib>=1.5.1
