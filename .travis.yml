@@ -6,7 +6,13 @@ python:
   - "pypy3.5"
 # command to install dependencies
 install:
+  - pip install codecov
   - pip install .
   - pip install -r requirements.txt
 # command to run tests
-script: pytest
+script: 
+  - pytest
+  - coverage run test_configurator.py
+
+after_success:
+  - codecov
