@@ -46,6 +46,11 @@ Windows | macOS | Linux
 
 How to use the library...
 
+```python
+s = "Python syntax highlighting"
+print s
+```
+
 ## Roadmap
 
 Begin: 29.11.2017
