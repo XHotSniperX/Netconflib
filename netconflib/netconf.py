@@ -11,8 +11,8 @@ from treelib import Tree
 from paramiko import BadHostKeyException
 from paramiko import AuthenticationException
 from paramiko import SSHException
-from .ssh import SSH
-from .commands import Commands
+from ssh import SSH
+from commands import Commands
 
 class NetConf:
     """Configuration library
@@ -189,6 +189,15 @@ class NetConf:
                 .format(os.path.abspath(SSH.PRIVATE_KEY_FILE),
                 self.topology.get_node(id).address))
 
+    def execute_command_on_all(self, cmd):
+        """Executes the specified command on every node.
+        
+        Arguments:
+            cmd {string} -- Command.
+        """
+
+        self.topology.send_command_to_all(cmd)
+
 class Node:
     """This class provides the functionality of a node.
     """
@@ -255,6 +264,16 @@ class Node:
             self.logger.debug("%s: echo '%s    %s' | sudo tee -a /etc/hosts", self.name, addr, name)
             self.connection.send_command(
                 "echo '{}    {}' | sudo tee -a /etc/hosts".format(addr, name))
+
+    def send_command(self, cmd):
+        """Sends and executes the provided command on the node.
+        
+        Arguments:
+            cmd {string} -- Command.
+        """
+
+        self.logger.debug("Executing following command on node %s: '%s'", self.name, cmd)
+        self.connection.send_command(cmd)
 
     def create_ssh_connection(self, username, password):
         """Creates an SSH connection to this node.
@@ -337,6 +356,15 @@ class Topology:
             if node.node_id == node_id:
                 return node
 
+    def get_nodes_count(self):
+        """Return an integer indicating the number of nodes.
+        
+        Returns:
+            integer -- Node count.
+        """
+
+        return self.num_nodes
+
     def create_all_connections(self):
         """Creates connections for every available node in the topology.
         """
@@ -368,6 +396,16 @@ class Topology:
 
         for node in self.nodes:
             node.send_hosts()
+
+    def send_command_to_all(self, cmd):
+        """Executes the provided command on every node.
+        
+        Arguments:
+            cmd {string} -- Command.
+        """
+
+        for node in self.nodes:
+            node.send_command(cmd)
 
 class TopologyTypes:
     """Available topology types.

@@ -4,6 +4,7 @@ import logging
 import configparser
 sys.path.append('../netconflib')
 from netconflib.netconf import NetConf
+from netconflib.commands import Paths
 from collections import Counter
 
 
@@ -11,7 +12,7 @@ class TestConfigurationMethods(unittest.TestCase):
     """Tests the configuration methods of NetConf.
     """
 
-    CONFIG_PATH = "tests/config.ini"
+    CONFIG_PATH = Paths.config_file_test
     MAX_NUM = 10
     MAX_DEGREE = 1
     config = None
