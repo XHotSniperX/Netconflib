@@ -11,8 +11,8 @@ from treelib import Tree
 from paramiko import BadHostKeyException
 from paramiko import AuthenticationException
 from paramiko import SSHException
-from ssh import SSH
-from commands import Commands
+from .ssh import SSH
+from .commands import Commands
 
 class NetConf:
     """Configuration library

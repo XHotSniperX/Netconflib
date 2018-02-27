@@ -7,7 +7,6 @@ from netconflib.netconf import NetConf
 from netconflib.commands import Paths
 from collections import Counter
 
-
 class TestConfigurationMethods(unittest.TestCase):
     """Tests the configuration methods of NetConf.
     """

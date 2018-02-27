@@ -5,7 +5,7 @@ This class gives the ability to show network activity.
 
 import os, time
 import threading, queue
-from scapy.all import *
+from scapy.all import sniff
 import logging
 
 class SnifferThread(threading.Thread):

@@ -8,11 +8,11 @@ import sys
 import logging
 from threading import Thread
 import traceback
-from netconf import NetConf
-from commands import Commands
-from commands import Paths
+from .netconf import NetConf
+from .commands import Commands
+from .commands import Paths
 
-class Server(object):
+class Server:
     """This class provides server features
     and listens to all the clients.
     """

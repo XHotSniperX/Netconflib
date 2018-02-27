@@ -119,7 +119,7 @@ setup(
     #
     #   py_modules=["my_module"],
     #
-    packages=find_packages(exclude=['contrib', 'docs', 'tests']),  # Required
+    packages=find_packages(exclude=['contrib']),  # Required
 
     # This field lists other packages that your project depends on to run.
     # Any package you put here will be installed by pip when your project is
@@ -141,7 +141,11 @@ setup(
     #    'dev': ['check-manifest'],
     #    'test': ['coverage'],
     #},
-
+    #
+    # For testing suites
+    test_suite='tests',
+    setup_requires=['pytest-runner'],
+    tests_require=['pytest'],
     # If there are data files included in your packages that need to be
     # installed, specify them here.
     #

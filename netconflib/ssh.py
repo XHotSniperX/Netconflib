@@ -11,7 +11,7 @@ import shlex
 import logging
 import threading
 from paramiko import client, Transport, RSAKey, Ed25519Key
-from commands import Commands
+from .commands import Commands
 
 class SSH:
     """This class provides SSH functionality.

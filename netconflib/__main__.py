@@ -1,8 +1,8 @@
 import logging
 import argparse
-from netconf import NetConf
-from server import Server
-from client import Client
+from .netconf import NetConf
+from .server import Server
+from .client import Client
 from pathlib import Path
 
 def main(args=None):

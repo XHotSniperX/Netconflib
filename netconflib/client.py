@@ -7,9 +7,9 @@ import threading, queue
 import socket
 import sys
 import logging
-from sniffer import SnifferThread
+from .sniffer import SnifferThread
 
-class Client(object):
+class Client:
     """The client class sends messages to the server.
     """
 
