@@ -5,6 +5,7 @@ Use this library to conveniently configure the network topology of a linux clust
 """
 
 import os
+from sys import platform
 import configparser
 import logging
 from treelib import Tree
@@ -175,6 +176,8 @@ class NetConf:
         This is a helper method, to automatically start SSH sessions.
         """
 
+        if platform == "linux" or platform == "linux2" or platform == "darwin":
+            pass #TODO different os support
         for node in self.topology.nodes:
             os.system("start cmd /c ssh -i {} pi@{}"
                   .format(os.path.abspath(SSH.PRIVATE_KEY_FILE),
