@@ -5,6 +5,7 @@ Use this library to conveniently configure the network topology of a linux clust
 """
 
 import os
+import subprocess
 from sys import platform
 import configparser
 import logging
@@ -176,21 +177,37 @@ class NetConf:
         This is a helper method, to automatically start SSH sessions.
         """
 
-        if platform == "linux" or platform == "linux2" or platform == "darwin":
-            pass #TODO different os support
-        for node in self.topology.nodes:
-            os.system("start cmd /c ssh -i {} pi@{}"
-                  .format(os.path.abspath(SSH.PRIVATE_KEY_FILE),
-                  node.address))
+        cmd = ""
+        if platform == "linux" or platform == "linux2":
+            cmd =Commands.cmd_start_shell_lin
+        elif platform == "darwin":
+            cmd =Commands.cmd_start_shell_mac
+        elif platform == "win32":
+            cmd =Commands.cmd_start_shell_win
+
+        if cmd is not "":
+            for node in self.topology.nodes:
+                    subprocess.Popen(Commands.cmd_start_shell_win
+                        .format(os.path.abspath(SSH.PRIVATE_KEY_FILE),
+                        node.address), shell=True)
 
     def open_shell(self, id):
         """Starts system shell and establishes SSH to specified node.
         This is a helper method, to automatically start SSH sessions.
         """
 
-        os.system("start cmd /c ssh -i {} pi@{}"
+        cmd = ""
+        if platform == "linux" or platform == "linux2":
+            cmd =Commands.cmd_start_shell_lin
+        elif platform == "darwin":
+            cmd =Commands.cmd_start_shell_mac
+        elif platform == "win32":
+            cmd =Commands.cmd_start_shell_win
+            
+        if cmd is not "":
+            subprocess.Popen(cmd
                 .format(os.path.abspath(SSH.PRIVATE_KEY_FILE),
-                self.topology.get_node(id).address))
+                self.topology.get_node(id).address), shell=True)
 
     def execute_command_on_all(self, cmd):
         """Executes the specified command on every node.
