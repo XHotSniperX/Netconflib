@@ -64,10 +64,10 @@ class SSH:
         return result
 
     def send_shell(self, command):
-        """[summary]
+        """Experimental. Do not use this.
 
         Arguments:
-            command {[type]} -- [description]
+            command {string} -- Command
         """
 
         if self.shell:
@@ -98,7 +98,8 @@ class SSH:
         self.client.set_missing_host_key_policy(client.AutoAddPolicy())
         if not self.private_key_exists():
             self.generate_key()
-        self.share_key_with_host(username, password, self.get_public_key())
+        self.share_key_with_host(self.get_public_key(), username, password)
+        self.close_connection()
 
         self.client.connect(self.address, username=username,
                             pkey=self.get_private_key())
@@ -123,28 +124,44 @@ class SSH:
             self.logger.debug("The host does not have this key.")
             return False
 
-    def share_key_with_host(self, username, password, key):
+    def check_cluster_key_generated(self):
+        """Checks if the host has an id_rsa key or not.
+        
+        Returns:
+            boolean -- True if yes, false else.
+        """
+
+        cmd = Commands.cmd_check_key_cluster
+        self.logger.debug("Check command: %s", cmd)
+        output = self.send_command(cmd)
+        if "found" in output:
+            self.logger.debug("The host has already generated an SSH key.")
+            return True
+        else:
+            self.logger.debug("The host does not have an SSH key yet.")
+            return False
+
+    def share_key_with_host(self, key, username=None, password=None):
         """Saves the provided key (public part) on the server.
         If the key exists, nothing will be shared.
         
         Arguments:
+            key {string} -- The public key.
             username {string} -- The host's username.
             password {string} -- The host's password.
-            key {string} -- The public key.
         """
 
-        self.client.connect(self.address, username=username,
+        if username is not None:
+            self.client.connect(self.address, username=username,
                             password=password)
         if not self.check_host_key(key):
             self.logger.debug("Adding public key to the host's authorized_keys...")
-            self.send_command(
-            "umask 077 && mkdir -p ~/.ssh && echo '{}' >> ~/.ssh/authorized_keys"
-            .format(key))
+            self.send_command(Commands.cmd_add_key_to_authorized_keys
+                .format(key))
         if not self.check_host_key(key):
             self.logger.error("Key sharing failed, deleting local key...")
             os.remove(self.PRIVATE_KEY_FILE)
             os.remove(self.PUBLIC_KEY_FILE)
-        self.client.close()
 
     def generate_key(self):
         """Generates an OpenSSH key for SSH authentication.
@@ -163,6 +180,12 @@ class SSH:
             #process = Popen("cmd.exe", shell=False, universal_newlines=True,
             #      stdin=PIPE, stdout=PIPE, stderr=PIPE)
             #process.communicate(Commands.cmd_generate_ed25519_key.format(self.PRIVATE_KEY_FILE))
+
+    def generate_remote_ssh_key(self):
+        """Generates an ssh key pair on the cluster node.
+        """
+
+        self.send_command(Commands.cmd_generate_cluster_key)
 
     def private_key_exists(self):
         """Check whether the private key file exists or not.
@@ -211,11 +234,27 @@ class SSH:
                 p_key = key
         return p_key
 
+    def get_public_key_from_remote(self):
+        """Fetches the public ssh key from remote node.
+        If key does not exist, an empty string will be returned.
+        
+        Returns:
+            string -- The key.
+        """
+
+        public_key = ""
+
+        self.logger.debug("Fetching the public ssh key from remote node...")
+        if self.check_cluster_key_generated():
+            public_key = self.send_command(Commands.cmd_get_public_key_from_node)
+        else:
+            self.logger.error("Remote node doesn not have ssh key.")
+
+        return public_key
+
     def close_connection(self):
         """Closes the connection to the SSH host.
         """
 
         if self.client != None:
             self.client.close()
-        if self.transport != None:
-            self.transport.close()

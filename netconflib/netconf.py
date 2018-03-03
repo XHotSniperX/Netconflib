@@ -218,6 +218,32 @@ class NetConf:
 
         self.topology.send_command_to_all(cmd)
 
+    def set_up_cluster_ssh(self):
+        """Setups the ssh keys for cluster internal communication.
+        """
+
+        self.generate_ssh_keys_on_cluster()
+        self.exchange_ssh_public_keys_on_cluster()
+
+    def generate_ssh_keys_on_cluster(self):
+        """Generates ssh rsa key pairs on all nodes on the cluster.
+        """
+
+        for node in self.topology.nodes:
+            if not node.connection.check_cluster_key_generated():
+                node.connection.generate_remote_ssh_key()
+            
+    def exchange_ssh_public_keys_on_cluster(self):
+        """Exchanges public ssh keys on all cluster nodes.
+        """
+
+        for nodex in self.topology.nodes:
+            public_key = nodex.connection.get_public_key_from_remote()
+            for nodey in self.topology.nodes:
+                if nodex.node_id == nodey.node_id:
+                    continue
+                nodey.connection.share_key_with_host(public_key)
+
 class Node:
     """This class provides the functionality of a node.
     """

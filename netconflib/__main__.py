@@ -45,6 +45,8 @@ testing=no
                         help="open shell to cluster node with id")
     parser.add_argument('-ipforward', action='store_true',
                         help="enable ip forwarding on every node of the cluster")
+    parser.add_argument('-sshsetup', action='store_true',
+                        help="setup ssh keys for internal communication on the cluster")
     parser.add_argument('-updatehosts', action='store_true',
                         help="updates the hosts file of every node of the cluster")
     parser.add_argument('-ring', action='store_true',
@@ -95,6 +97,8 @@ testing=no
             ncl.open_shell(args.shell[0])
         elif args.ipforward:
             ncl.enable_ip_forwarding()
+        elif args.sshsetup:
+            ncl.set_up_cluster_ssh()
         elif args.updatehosts:
             ncl.update_hosts_file()
         elif args.ring:
