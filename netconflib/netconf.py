@@ -179,15 +179,15 @@ class NetConf:
 
         cmd = ""
         if platform == "linux" or platform == "linux2":
-            cmd =Commands.cmd_start_shell_lin
+            cmd = Commands.cmd_start_shell_lin
         elif platform == "darwin":
-            cmd =Commands.cmd_start_shell_mac
+            cmd = Commands.cmd_start_shell_mac
         elif platform == "win32":
-            cmd =Commands.cmd_start_shell_win
+            cmd = Commands.cmd_start_shell_win
 
         if cmd is not "":
             for node in self.topology.nodes:
-                    subprocess.Popen(Commands.cmd_start_shell_win
+                    subprocess.Popen(cmd
                         .format(os.path.abspath(SSH.PRIVATE_KEY_FILE),
                         node.address), shell=True)
 
@@ -198,11 +198,11 @@ class NetConf:
 
         cmd = ""
         if platform == "linux" or platform == "linux2":
-            cmd =Commands.cmd_start_shell_lin
+            cmd = Commands.cmd_start_shell_lin
         elif platform == "darwin":
-            cmd =Commands.cmd_start_shell_mac
+            cmd = Commands.cmd_start_shell_mac
         elif platform == "win32":
-            cmd =Commands.cmd_start_shell_win
+            cmd = Commands.cmd_start_shell_win
             
         if cmd is not "":
             subprocess.Popen(cmd
