@@ -188,11 +188,13 @@ class NetConf:
         if cmd is not "":
             for node in self.topology.nodes:
                 if platform == "darwin":
-                    subprocess.Popen(['osascript', '-'],
-                                     stdin=subprocess.PIPE,
-                                     stdout=subprocess.PIPE,
-                                     stderr=subprocess.PIPE,
-                                     universal_newlines=True).communicate(cmd.format(os.path.abspath(SSH.PRIVATE_KEY_FILE), node.address))
+                    p = subprocess.Popen(['osascript', '-'],
+                                         stdin=subprocess.PIPE,
+                                         stdout=subprocess.PIPE,
+                                         stderr=subprocess.PIPE,
+                                         universal_newlines=True)
+                    p.communicate(cmd
+                                  .format(os.path.abspath(SSH.PRIVATE_KEY_FILE), node.address))
                 else:
                     subprocess.Popen(cmd
                                      .format(os.path.abspath(SSH.PRIVATE_KEY_FILE),
@@ -210,7 +212,7 @@ class NetConf:
             cmd = Commands.cmd_start_shell_mac
         elif platform == "win32":
             cmd = Commands.cmd_start_shell_win
-            
+
         if cmd is not "":
             if platform == "darwin":
                     p = subprocess.Popen(['osascript', '-'],
@@ -220,11 +222,11 @@ class NetConf:
                                          universal_newlines=True)
                     _, _ = p.communicate(cmd
                                          .format(os.path.abspath(SSH.PRIVATE_KEY_FILE),
-                                         self.topology.get_node(id).address))
+                                                 self.topology.get_node(id).address))
             else:
                 subprocess.Popen(cmd
-                    .format(os.path.abspath(SSH.PRIVATE_KEY_FILE),
-                    self.topology.get_node(id).address), shell=True)
+                                 .format(os.path.abspath(SSH.PRIVATE_KEY_FILE),
+                                         self.topology.get_node(id).address), shell=True)
 
     def execute_command_on_all(self, cmd):
         """Executes the specified command on every node.
