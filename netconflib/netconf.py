@@ -187,9 +187,19 @@ class NetConf:
 
         if cmd is not "":
             for node in self.topology.nodes:
+                if platform == "darwin":
+                    p = subprocess.Popen(['osascript', '-'],
+                                         stdin=subprocess.PIPE,
+                                         stdout=subprocess.PIPE,
+                                         stderr=subprocess.PIPE,
+                                         universal_newlines=True)
+                    _, _ = p.communicate(Commands.cmd_start_shell_mac
+                                         .format(os.path.abspath(SSH.PRIVATE_KEY_FILE),
+                                                 node.address))
+                else:
                     subprocess.Popen(cmd
-                        .format(os.path.abspath(SSH.PRIVATE_KEY_FILE),
-                        node.address), shell=True)
+                                     .format(os.path.abspath(SSH.PRIVATE_KEY_FILE),
+                                             node.address), shell=True)
 
     def open_shell(self, id):
         """Starts system shell and establishes SSH to specified node.
