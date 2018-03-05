@@ -4,6 +4,9 @@ from .netconf import NetConf
 from .server import Server
 from .client import Client
 from pathlib import Path
+from .helper import get_my_ip
+from .commands import Commands
+from .commands import Paths
 
 def main(args=None):
     """Runs the configurator.
@@ -31,12 +34,14 @@ password=raspberry
 [settings]
 testing=no
 '''
-    parser.add_argument("path", type=str,
+    parser.add_argument("-path", action='store_true', type=str,
                         help=path_help)
     parser.add_argument('--verbose', action='store_true',
                         help='print debug information (default: only info and error)')
     parser.add_argument('-server', action='store_true',
                         help='start server for client sniffing')
+    parser.add_argument('-client', action='store_true',
+                        help='start clients for sniffing')
     parser.add_argument('-sniff', nargs=1, type=str, metavar=('SERVER-ADDRESS'),
                         help='start sniffing on the network interface (-sniff <server address>)')
     parser.add_argument('-shells', action='store_true',
@@ -55,7 +60,7 @@ testing=no
                         help="configure the cluster's network topology as a star")
     parser.add_argument('-tree', nargs=2, type=int, metavar=('ROOT', 'DEGREE'),
                         help="configure the cluster's network topology as a tree (-tree <root> <degree>)")
-    parser.add_argument('--version', action='version', version='Netconf  v0.6.4')
+    parser.add_argument('--version', action='version', version='Netconf  v0.6.5')
     args = parser.parse_args()
 
     # logging configuration
@@ -75,22 +80,21 @@ testing=no
     logger.addHandler(f_handler)
     logger.addHandler(c_handler)
 
-
-    if args.path is None:
-        logger.error("The path is required, exiting...")
-        exit(1)
-    elif not Path(args.path).is_file():
-        logger.error("The specified path is not a file. Exiting...")
-        exit(1)
+    configfile = None
+    if args.path is not None:
+        if not Path(args.path).is_file():
+            logger.error("The specified path is not a file. Exiting...")
+            exit(1)
+        else:
+            configfile = args.path
     if args.server:
         server = Server()
         server.start_server()
-        server.start_clients()
     elif args.sniff is not None:
         client = Client(args.sniff[0])
         client.start_sniffer()
     else:
-        ncl = NetConf(args.path)
+        ncl = NetConf(configfile)
         if args.shells:
             ncl.open_shells()
         elif args.shell is not None:
@@ -109,6 +113,10 @@ testing=no
             root = args.tree[0]
             degree = args.tree[1]
             ncl.configure_tree_topology(root, degree)
+        elif args.client:
+            logger.info("Starting the clients on the cluster...")
+            cmd = Commands.cmd_start_client.format(get_my_ip())
+            ncl.execute_command_on_all(cmd)
 
 if __name__ == '__main__':
     main()

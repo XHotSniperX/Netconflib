@@ -15,6 +15,7 @@ from paramiko import AuthenticationException
 from paramiko import SSHException
 from .ssh import SSH
 from .commands import Commands
+from .commands import Paths
 
 class NetConf:
     """Configuration library
@@ -23,12 +24,10 @@ class NetConf:
     of a Linux cluster.
     """
 
-    def __init__(self, configfile):
+    def __init__(self, configfile=None):
         self.logger = logging.getLogger('app.netconflib.NetConf')
         self.logger.info("Starting linux network configuration...")
-        self.config = configparser.ConfigParser()
-        self.config.read(configfile)
-        self.cmds = Commands()
+        self.config = self.init_config(configfile)
         nodes = self.config.items("hosts")
         num_nodes = len(nodes)
         username = self.config.get("authentication", "username")
@@ -43,13 +42,47 @@ class NetConf:
         if not self.testing:
             self.topology.create_all_connections()
 
+    def init_config(self, configfile):
+        """Initializes and returns the configuration file.
+        
+        Arguments:
+            configfile {string} -- File path to config.ini
+        
+        Returns:
+            ConfigParser -- The configuration object.
+        """
+
+        config = configparser.ConfigParser()
+        if configfile is None:
+            self.create_default_config_file()
+            config.read(Paths.config_file)
+        else:
+            config.read(configfile)
+        return config
+    
+    def create_default_config_file(self):
+        """Creates a new default config file in program folder.
+        """
+
+        config = configparser.ConfigParser()
+
+        config['hosts'] = {'node1': '10.0.1.33',
+                           'node2': '10.0.1.34',
+                           'node3': '10.0.1.35',
+                           'node4': '10.0.1.36'}
+        config['authentication'] = {'username': 'pi',
+                                    'password': 'raspberry'}
+        config['settings'] = {'testing': 'no'}
+        with open(Paths.config_file, 'w') as configfile:
+            config.write(configfile)
+
     def enable_ip_forwarding(self):
         """Enables ip packet forwarding on every node on the cluster."""
 
         self.logger.info("Enabling IP packet forwarding...")
         for node in self.topology.nodes:
             if not self.testing and not node.connection is None:
-                node.connection.send_command(self.cmds.cmd_ipforward)
+                node.connection.send_command(Commands.cmd_ipforward)
 
     def update_hosts_file(self):
         """Appends all the ip addresses and host names to etc/hosts file.

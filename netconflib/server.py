@@ -8,6 +8,7 @@ import sys
 import logging
 from threading import Thread
 import traceback
+from .helper import get_my_ip
 from .netconf import NetConf
 from .commands import Commands
 from .commands import Paths
@@ -22,7 +23,7 @@ class Server:
         self.logger.info("Starting server...")
 
         # My ip address
-        self.local_address = self.get_my_ip()
+        self.local_address = get_my_ip()
 
         self.ncl = NetConf(Paths.config_file)
         self.num_nodes = self.ncl.topology.get_nodes_count()
@@ -60,13 +61,6 @@ class Server:
                 traceback.print_exc()
 
         self.sock.close()
-
-    def start_clients(self):
-        """Start the sniffing clients on the cluster.
-        """
-
-        cmd = Commands.cmd_start_client + " " + self.local_address()
-        self.ncl.execute_command_on_all(cmd)
 
     def client_thread(self, connection, ip, port, max_buffer_size=5120):
         """The client thread receives and processes client inputs.
@@ -128,13 +122,3 @@ class Server:
 
         self.logger.info("Processing the input from the client...")
         return input_str
-
-    def get_my_ip(self):
-        """Returns the local IP address of this machine.
-        """
-
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("8.8.8.8", 80))
-        ip = s.getsockname()[0]
-        s.close()
-        return ip

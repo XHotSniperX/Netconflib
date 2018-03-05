@@ -8,6 +8,7 @@ import socket
 import sys
 import logging
 from .sniffer import SnifferThread
+from .helper import get_my_ip
 
 class Client:
     """The client class sends messages to the server.
@@ -18,7 +19,7 @@ class Client:
         self.logger.info("Starting client...")
 
         # My ip address
-        self.local_address = self.get_my_ip()
+        self.local_address = get_my_ip()
 
         # Create output queue for sniffer thread
         self.result_q = queue.Queue()
@@ -69,13 +70,3 @@ class Client:
     def close(self):
         self.logger.debug("Closing socket...")
         self.sock.close()
-
-    def get_my_ip(self):
-        """Returns the local IP address of this machine.
-        """
-
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("8.8.8.8", 80))
-        ip = s.getsockname()[0]
-        s.close()
-        return ip
