@@ -63,7 +63,7 @@ class Client:
 
         try:
             self.logger.debug('Sending {!r}'.format(msg))
-            self.sock.sendall(msg)
+            self.sock.sendall(msg.encode())
         except socket.error:
             self.logger.error("Socket error while sending message.")
 

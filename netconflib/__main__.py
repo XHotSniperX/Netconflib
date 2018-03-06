@@ -38,12 +38,12 @@ testing=no
                         help=config_help)
     parser.add_argument('--verbose', action='store_true',
                         help='print debug information (default: only info and error)')
-    parser.add_argument('-server', action='store_true',
-                        help='start server for client sniffing')
-    parser.add_argument('-client', action='store_true',
-                        help='start clients for sniffing')
-    parser.add_argument('-sniff', nargs=1, type=str, metavar=('SERVER-ADDRESS'),
-                        help='start sniffing on the network interface (-sniff <server address>)')
+    parser.add_argument('-server', nargs='?', const=10000, type=int, metavar=('PORT'),
+                        help='start server for client sniffing (sepcify port with -server <PORT>, defualt: 10000)')
+    parser.add_argument('-client', nargs='?', const=10000, type=int, metavar=('PORT'),
+                        help='start clients for sniffing (sepcify port with -client <PORT>, defualt: 10000)')
+    parser.add_argument('-sniff', nargs=2, type=str, metavar=('SERVER-ADDRESS', 'PORT'),
+                        help='start sniffing on the network interface (-sniff <server address> <port>)')
     parser.add_argument('-shells', action='store_true',
                         help='open shells to all cluster nodes')
     parser.add_argument('-shell', nargs=1, type=int, metavar=('NODE-ID'),
@@ -60,7 +60,7 @@ testing=no
                         help="configure the cluster's network topology as a star")
     parser.add_argument('-tree', nargs=2, type=int, metavar=('ROOT', 'DEGREE'),
                         help="configure the cluster's network topology as a tree (-tree <root> <degree>)")
-    parser.add_argument('--version', action='version', version='Netconf  v0.6.7')
+    parser.add_argument('--version', action='version', version='Netconf  v0.6.9')
     args = parser.parse_args()
 
     # logging configuration
@@ -87,11 +87,11 @@ testing=no
             exit(1)
         else:
             configfile = args.config[0]
-    if args.server:
-        server = Server()
+    if args.server is not None:
+        server = Server(args.server)
         server.start_server()
     elif args.sniff is not None:
-        client = Client(args.sniff[0])
+        client = Client((args.sniff[0], int(float(args.sniff[1]))))
         client.start_sniffer()
     else:
         ncl = NetConf(configfile)
@@ -113,9 +113,9 @@ testing=no
             root = args.tree[0]
             degree = args.tree[1]
             ncl.configure_tree_topology(root, degree)
-        elif args.client:
+        elif args.client is not None:
             logger.info("Starting the clients on the cluster...")
-            cmd = Commands.cmd_start_client.format(get_my_ip())
+            cmd = Commands.cmd_start_client.format(get_my_ip(), args.client)
             ncl.execute_command_on_all(cmd)
 
 if __name__ == '__main__':

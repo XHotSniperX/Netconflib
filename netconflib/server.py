@@ -18,7 +18,7 @@ class Server:
     and listens to all the clients.
     """
 
-    def __init__(self):
+    def __init__(self, port):
         self.logger = logging.getLogger('app.server')
         self.logger.info("Starting server...")
 
@@ -28,9 +28,12 @@ class Server:
         self.ncl = NetConf(Paths.config_file)
         self.num_nodes = self.ncl.topology.get_nodes_count()
 
-        self.server_address = ('localhost', 10000)
+        self.server_address = (get_my_ip(), port)
 
     def start_server(self):
+        """Starts the server process which listens and accepts clients.
+        """
+
         # Create a TCP/IP socket
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
