@@ -12,7 +12,7 @@ class Commands:
     cmd_check_key_cluster = "[ -f ~/.ssh/id_rsa ] && echo 'found' || echo 'not found'"
     cmd_get_public_key_from_node = 'echo "$(cat ~/.ssh/id_rsa.pub)"'
     cmd_generate_ed25519_key = 'ssh-keygen -f {} -t ed25519 -N ""'
-    cmd_start_client = "python -m netconflib -sniff {}"
+    cmd_start_client = "python3 -m netconflib -sniff {}"
     cmd_start_shell_win = "start cmd /c ssh -i {} pi@{}"
     cmd_start_shell_lin = "gnome-terminal -x ssh -i {} pi@{}"
     cmd_start_shell_mac = 'tell application "Terminal" to do script "ssh -i {} pi@{}"'
