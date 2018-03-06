@@ -15,7 +15,7 @@ def main(args=None):
     # parser
     parser = argparse.ArgumentParser(description='Network configurator.',
                                     formatter_class=argparse.RawTextHelpFormatter)
-    path_help = '''The absolute path to the config.ini file.
+    config_help = '''The absolute path to the config.ini file.
 The configuration file indicates the nodes' ip addresses (hosts)
 and the authentication that is required to login to them.
 
@@ -34,8 +34,8 @@ password=raspberry
 [settings]
 testing=no
 '''
-    parser.add_argument("-path", action='store_true', type=str,
-                        help=path_help)
+    parser.add_argument("-config", nargs=1, type=str, metavar=('CONFIG-PATH'),
+                        help=config_help)
     parser.add_argument('--verbose', action='store_true',
                         help='print debug information (default: only info and error)')
     parser.add_argument('-server', action='store_true',
@@ -60,7 +60,7 @@ testing=no
                         help="configure the cluster's network topology as a star")
     parser.add_argument('-tree', nargs=2, type=int, metavar=('ROOT', 'DEGREE'),
                         help="configure the cluster's network topology as a tree (-tree <root> <degree>)")
-    parser.add_argument('--version', action='version', version='Netconf  v0.6.5')
+    parser.add_argument('--version', action='version', version='Netconf  v0.6.6')
     args = parser.parse_args()
 
     # logging configuration
@@ -81,12 +81,12 @@ testing=no
     logger.addHandler(c_handler)
 
     configfile = None
-    if args.path is not None:
-        if not Path(args.path).is_file():
+    if args.config is not None:
+        if not Path(args.config[0]).is_file():
             logger.error("The specified path is not a file. Exiting...")
             exit(1)
         else:
-            configfile = args.path
+            configfile = args.config[0]
     if args.server:
         server = Server()
         server.start_server()
