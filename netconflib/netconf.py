@@ -363,7 +363,7 @@ class Node:
             self.connection.send_command(
                 "echo '{}    {}' | sudo tee -a /etc/hosts".format(addr, name))
 
-    def send_command(self, cmd):
+    def send_command(self, cmd, block=True):
         """Sends and executes the provided command on the node.
         
         Arguments:
@@ -371,7 +371,7 @@ class Node:
         """
 
         self.logger.debug("Executing following command on node %s: '%s'", self.name, cmd)
-        self.connection.send_command(cmd)
+        self.connection.send_command(cmd, block)
 
     def create_ssh_connection(self, username, password):
         """Creates an SSH connection to this node.
@@ -496,14 +496,14 @@ class Topology:
             node.send_hosts()
 
     def send_command_to_all(self, cmd):
-        """Executes the provided command on every node.
+        """Executes the provided command on every node in parallel.
         
         Arguments:
             cmd {string} -- Command.
         """
 
         for node in self.nodes:
-            node.send_command(cmd)
+            node.send_command(cmd, False)
 
 class TopologyTypes:
     """Available topology types.

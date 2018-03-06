@@ -26,7 +26,10 @@ class SSH:
 
         self.address = address
         self.client = client.SSHClient()
-        self.setup_ssh(username, password)
+        #self.setup_ssh(username, password)
+
+        thread = threading.Thread(target=self.setup_ssh, args=(username, password))
+        thread.start()
 
         if shell:
             self.shell = self.client.invoke_shell()
@@ -36,7 +39,7 @@ class SSH:
             thread.daemon = True
             thread.start()
 
-    def send_command(self, command):
+    def send_command(self, command, block=True):
         """Executes the command on the remote shell and prints the output.
 
         You can send a shell command to the remote machine and execute it.
@@ -53,12 +56,11 @@ class SSH:
         if self.client:
             self.logger.debug("Executing command: %s", command)
             _, stdout, stderr = self.client.exec_command(command, get_pty=True)
-            for line in iter(stdout.readline, ""):
-                result += line
-                self.logger.debug(line)
-            for line in iter(stderr.readline, ""):
-                result += line
-                self.logger.debug(line)
+            if block:
+                result = self.process_data(stdout, stderr)
+            else:
+                thread = threading.Thread(target=self.process_data, args=(stdout, stderr))
+                thread.start()
         else:
             self.logger.error("Connection not opened.")
         return result
@@ -74,6 +76,23 @@ class SSH:
             self.shell.send(command + "\n")
         else:
             print("Shell not opened.")
+
+    def process_data(self, stdout, stderr):
+        """Processes the data in the communication channel.
+        
+        Arguments:
+            stdout {[type]} -- [description]
+            stderr {[type]} -- [description]
+        """
+
+        result = ""
+        for line in iter(stdout.readline, ""):
+            result += line
+            self.logger.debug(line)
+        for line in iter(stderr.readline, ""):
+            result += line
+            self.logger.debug(line)
+        return result
 
     def process(self):
         """Prints data in the console when available.
