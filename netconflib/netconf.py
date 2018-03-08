@@ -476,6 +476,8 @@ class Topology:
         except (ValueError, BadHostKeyException, AuthenticationException, SSHException) as ex:
             self.logger.error(ex)
             self.logger.error("connection failed with %s.", node.name)
+        for node in self.nodes:
+            node.connection.threadpool[0].join()
         self.logger.info("Connections setup done.")
 
     def send_forwarding_tables(self, remove=False):

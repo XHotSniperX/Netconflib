@@ -9,9 +9,11 @@ import subprocess
 from sys import platform
 import shlex
 import logging
-import threading
+import threading, queue
 from paramiko import client, Transport, RSAKey, Ed25519Key
 from .commands import Commands
+
+outlock = threading.Lock()
 
 class SSH:
     """This class provides SSH functionality.
@@ -28,8 +30,10 @@ class SSH:
         self.client = client.SSHClient()
         #self.setup_ssh(username, password)
 
+        self.threadpool = []
         thread = threading.Thread(target=self.setup_ssh, args=(username, password))
         thread.start()
+        self.threadpool.append(thread)
 
         if shell:
             self.shell = self.client.invoke_shell()
@@ -53,14 +57,14 @@ class SSH:
         """
 
         result = ""
+        out_queue = queue.Queue()
         if self.client:
             self.logger.debug("Executing command: %s", command)
-            _, stdout, stderr = self.client.exec_command(command, get_pty=True)
+            thread = threading.Thread(target=self.process_data, args=(command, out_queue))
+            thread.start()
             if block:
-                result = self.process_data(stdout, stderr)
-            else:
-                thread = threading.Thread(target=self.process_data, args=(stdout, stderr))
-                thread.start()
+                thread.join()
+                result = out_queue.get()
         else:
             self.logger.error("Connection not opened.")
         return result
@@ -77,7 +81,7 @@ class SSH:
         else:
             print("Shell not opened.")
 
-    def process_data(self, stdout, stderr):
+    def process_data(self, cmd, out_queue):
         """Processes the data in the communication channel.
         
         Arguments:
@@ -86,13 +90,14 @@ class SSH:
         """
 
         result = ""
+        _, stdout, stderr = self.client.exec_command(cmd, get_pty=True)
         for line in iter(stdout.readline, ""):
             result += line
             self.logger.debug(line)
         for line in iter(stderr.readline, ""):
             result += line
             self.logger.debug(line)
-        return result
+        out_queue.put(result)
 
     def process(self):
         """Prints data in the console when available.
