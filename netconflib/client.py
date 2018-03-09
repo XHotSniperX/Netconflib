@@ -15,7 +15,7 @@ class Client:
     """
 
     def __init__(self, server_address):
-        self.logger = logging.getLogger('app.client')
+        self.logger = logging.getLogger('app.netconflib.client')
         self.logger.info("Starting client...")
 
         # My ip address

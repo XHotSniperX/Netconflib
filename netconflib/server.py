@@ -7,11 +7,13 @@ import socket
 import sys
 import logging
 from threading import Thread
+from queue import Queue
 import traceback
 from .helper import get_my_ip
 from .netconf import NetConf
 from .commands import Commands
 from .commands import Paths
+from .gui import GUI
 
 class Server:
     """This class provides server features
@@ -19,7 +21,7 @@ class Server:
     """
 
     def __init__(self, port):
-        self.logger = logging.getLogger('app.server')
+        self.logger = logging.getLogger('app.netconflib.server')
         self.logger.info("Starting server...")
 
         # My ip address
@@ -27,6 +29,9 @@ class Server:
 
         self.ncl = NetConf(Paths.config_file)
         self.num_nodes = self.ncl.topology.get_nodes_count()
+
+        self.threads = []
+        self.result_q = Queue()
 
         self.server_address = (get_my_ip(), port)
 
@@ -47,23 +52,26 @@ class Server:
             self.logger.error("Bind failed. Error : " + str(sys.exc_info()))
             sys.exit()
 
-        # Listen for incoming connections (up to node count)
+        # Listen for incoming connections
         self.sock.listen(self.num_nodes)
-        self.logger.debug("Server is now listening...")
+        self.logger.info("Server is now listening...")
 
         # infinite loop- do not reset for every requests
-        while True:
+        while len(self.threads) < self.num_nodes:
             connection, address = self.sock.accept()
             ip, port = str(address[0]), str(address[1])
             self.logger.info("Connected with " + ip + ":" + port)
 
             try:
-                Thread(target=self.client_thread, args=(connection, ip, port)).start()
+                t = Thread(target=self.client_thread, args=(connection, ip, port)).start()
+                self.threads.append(t)
             except:
                 print("Thread did not start.")
                 traceback.print_exc()
 
         self.sock.close()
+        self.logger.info("All client threads started.")
+        self.start_gui()
 
     def client_thread(self, connection, ip, port, max_buffer_size=5120):
         """The client thread receives and processes client inputs.
@@ -125,3 +133,11 @@ class Server:
 
         self.logger.info("Processing the input from the client...")
         return input_str
+
+    def start_gui(self):
+        """Starts the gui in main loop.
+        Call this method only after starting the client threads.
+        """
+
+        g = GUI(self.result_q)
+        g.run()

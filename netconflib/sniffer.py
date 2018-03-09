@@ -14,7 +14,7 @@ class SnifferThread(threading.Thread):
 
     def __init__(self, result_q):
         super(SnifferThread, self).__init__()
-        self.logger = logging.getLogger('app.sniffer')
+        self.logger = logging.getLogger('app.netconflib.sniffer')
         self.logger.info("Sniffing on network interface...")
         self.result_q = result_q
         self.stoprequest = threading.Event()
@@ -36,6 +36,8 @@ class SnifferThread(threading.Thread):
 
     def custom_action(self, packet):
         """Redefining the packet output.
+        Future: You could communicate with LCD displays here
+                to show the packet flow interactively.
 
         Arguments:
             packet {object} -- IP packet.
