@@ -49,7 +49,7 @@ class Client:
         while True:
             message = None
             try:
-                message = self.result_q.get() + ", " + self.local_address
+                message = "{}, {}".format(self.result_q.get(), self.local_address)
                 self.send_message(message)
             except queue.Empty:
                 continue
