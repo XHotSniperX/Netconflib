@@ -44,5 +44,5 @@ class SnifferThread(threading.Thread):
         """
 
         self.counter += 1
-        self.result_q.put(self.getName(), self.counter)
+        self.result_q.put(self.counter)
         return 'Packet #{}: {} ==> {}'.format(self.counter, packet[0][1].src, packet[0][1].dst)

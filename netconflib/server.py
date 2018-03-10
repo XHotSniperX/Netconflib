@@ -32,6 +32,7 @@ class Server:
 
         self.threads = []
         self.result_q = Queue()
+        self.is_active = True
 
         self.server_address = (get_my_ip(), port)
 
@@ -85,18 +86,15 @@ class Server:
             max_buffer_size {integer} -- Buffer size for input (default: {5120})
         """
 
-        is_active = True
-
-        while is_active:
+        while self.is_active:
             client_input = self.receive_input(connection, max_buffer_size)
             if "--QUIT--" in client_input:
                 self.logger.info("Client is requesting to quit")
                 connection.close()
                 self.logger.info("Connection " + ip + ":" + port + " closed")
-                is_active = False
+                self.is_active = False
             else:
                 self.logger.info("Processed result: {}".format(client_input))
-                connection.sendall("-".encode("utf8"))
 
     def receive_input(self, connection, max_buffer_size):
         """Receives messages from the client connection.
@@ -109,8 +107,14 @@ class Server:
             string -- The processed result of the input.
         """
 
-        client_input = connection.recv(max_buffer_size)
-        client_input_size = sys.getsizeof(client_input)
+        try:
+            client_input = connection.recv(max_buffer_size)
+            client_input_size = sys.getsizeof(client_input)
+        except ConnectionResetError:
+            self.logger.error("Connection lost to the remote host.")
+            connection.close()
+            self.is_active = False
+            return "--QUIT--"
 
         if client_input_size > max_buffer_size:
             self.logger.warning("The input size is greater than expected {}".format(
@@ -122,7 +126,7 @@ class Server:
         return result
 
     def process_input(self, input_str):
-        """Processes the client's input.
+        """Process the client's input.
         
         Arguments:
             input_str {string} -- The input.
@@ -132,12 +136,17 @@ class Server:
         """
 
         self.logger.info("Processing the input from the client...")
-        return input_str
+        result = ""
+        for node in self.ncl.topology.nodes:
+            if node.address in input_str:
+                result = "Node {}".format(node.node_id)
+                self.result_q.put(node.node_id + 1)
+        return result
 
     def start_gui(self):
         """Starts the gui in main loop.
         Call this method only after starting the client threads.
         """
 
-        g = GUI(self.result_q)
+        g = GUI(self.result_q, self.num_nodes)
         g.run()
