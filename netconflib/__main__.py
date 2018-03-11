@@ -8,11 +8,13 @@ from .helper import get_my_ip
 from .commands import Commands
 from .commands import Paths
 
-def main(args=None):
-    """Runs the configurator.
+def init_parser():
+    """Initializes the argument parser.
+
+    Returns:
+            args -- The parsed arguments.
     """
 
-    # parser
     parser = argparse.ArgumentParser(description='Network configurator.',
                                     formatter_class=argparse.RawTextHelpFormatter)
     config_help = '''The absolute path to the config.ini file.
@@ -61,10 +63,19 @@ testing=no
     parser.add_argument('-tree', nargs=2, type=int, metavar=('ROOT', 'DEGREE'),
                         help="configure the cluster's network topology as a tree (-tree <root> <degree>)")
     parser.add_argument('--version', action='version', version='Netconf  v0.8.2')
-    args = parser.parse_args()
+
+    return parser.parse_args()
+
+def configure_logging(args):
+    """Configures the logger.
+    
+    Arguments:
+        args {args} -- The parsed arguments from cli.
+    """
 
     # logging configuration
     logger = logging.getLogger('app')
+    logger.propagate = False
     logger.setLevel(logging.DEBUG)
     f_handler = logging.FileHandler('app.log')
     f_handler.setLevel(logging.DEBUG)
@@ -74,16 +85,25 @@ testing=no
     else:
         c_handler.setLevel(logging.INFO)
     formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    f_handler.setFormatter(formatter)
+        '%(asctime)s - %(threadName)s - %(name)s - %(levelname)s - %(message)s')
+    formatter_complex = logging.Formatter(
+        '%(asctime)s - %(threadName)s - %(name)s - %(levelname)s : %(lineno)d - %(message)s')
+    f_handler.setFormatter(formatter_complex)
     c_handler.setFormatter(formatter)
     logger.addHandler(f_handler)
     logger.addHandler(c_handler)
 
+def main(args=None):
+    """Runs the configurator.
+    """
+
+    args = init_parser()
+    configure_logging(args)
+
     configfile = None
     if args.config is not None:
         if not Path(args.config[0]).is_file():
-            logger.error("The specified path is not a file. Exiting...")
+            logging.error("The specified path is not a file. Exiting...")
             exit(1)
         else:
             configfile = args.config[0]
@@ -114,7 +134,7 @@ testing=no
             degree = args.tree[1]
             ncl.configure_tree_topology(root, degree)
         elif args.client is not None:
-            logger.info("Starting the clients on the cluster...")
+            logging.info("Starting the clients on the cluster...")
             cmd = Commands.cmd_start_client.format(get_my_ip(), args.client)
             ncl.execute_command_on_all(cmd)
 

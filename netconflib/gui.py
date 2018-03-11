@@ -79,7 +79,7 @@ class GUI():
                     return
                 self.counter += 1
                 n = int(float(message))
-                row = math.ceil(n / self.cols) - 1
+                #row = math.ceil(n / self.cols) - 1
                 #col = n - (row * self.cols) - 1
                 lbl_name = "l{}".format(n)
                 lbl_text = "Node {}\ncount = {}".format(n, self.counter)

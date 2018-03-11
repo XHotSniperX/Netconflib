@@ -37,7 +37,7 @@ class SnifferThread(threading.Thread):
     def custom_action(self, packet):
         """Redefining the packet output.
         Future: You could communicate with LCD displays here
-                to show the packet flow interactively.
+                to show the packet flow visually.
 
         Arguments:
             packet {object} -- IP packet.
