@@ -135,6 +135,8 @@ class Server:
             string -- The result of the processing.
         """
 
+        if "Hello server" in input_str:
+            return input_str
         input_array = input_str.split(" ")
         if len(input_array) != 2:
             self.logger.warning("Not expected message '%s' from client", input_str)

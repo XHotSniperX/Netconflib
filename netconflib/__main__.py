@@ -62,7 +62,7 @@ testing=no
                         help="configure the cluster's network topology as a star")
     parser.add_argument('-tree', nargs=2, type=int, metavar=('ROOT', 'DEGREE'),
                         help="configure the cluster's network topology as a tree (-tree <root> <degree>)")
-    parser.add_argument('--version', action='version', version='Netconf  v0.9')
+    parser.add_argument('--version', action='version', version='Netconf  v0.9.2')
 
     return parser.parse_args()
 

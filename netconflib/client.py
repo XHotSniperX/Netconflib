@@ -49,7 +49,7 @@ class Client:
         while True:
             message = None
             try:
-                message = "{}, {}".format(self.result_q.get(), self.local_address)
+                message = "{} {}".format(self.result_q.get(), self.local_address)
                 self.send_message(message)
             except queue.Empty:
                 continue
@@ -61,8 +61,8 @@ class Client:
             msg {string} -- A message text.
         """
 
+        self.logger.debug('Sending {}'.format(msg))
         try:
-            self.logger.debug('Sending {!r}'.format(msg))
             self.sock.sendall(msg.encode())
         except socket.error:
             self.logger.error("Socket error while sending message.")
