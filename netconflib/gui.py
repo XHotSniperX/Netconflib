@@ -4,6 +4,7 @@ This class is responsible for the gui.
 """
 
 import queue, time
+from random import choice
 import logging
 from appJar import gui
 import math
@@ -17,6 +18,8 @@ class GUI():
         self.logger = logging.getLogger('app.netconflib.gui')
         self.logger.info("Initializing graphical user interface...")
         self.result_q = result_q
+
+        self.colours = ["red", "blue", "green", "orange", "yellow", "PapayaWhip", "white", "brown"]
         self.counter = 0
         self.node_num = node_num
         self.cols = 1
@@ -25,15 +28,27 @@ class GUI():
         self.init_gui()
 
     def run(self):
+        """Starts the gui.
+        """
+
         self.app.thread(self.handle_messages)
         self.app.go()
 
     def init_gui(self):
+        """Initializes the gui.
+        """
+
         self.app.setSticky("news")
         self.app.setExpand("both")
         self.build_grid(self.node_num)
 
     def build_grid(self, size):
+        """Builds the gui grid. Every node has its own cell.
+        
+        Arguments:
+            size {integer} -- The number of nodes.
+        """
+
         cols = math.ceil(math.sqrt(size))
         rows = math.ceil(size / cols)
         self.cols = cols
@@ -46,22 +61,29 @@ class GUI():
                 if n > size:
                     break
                 lbl_name = "l{}".format(n)
-                lbl_text = "row={}\ncolumn={}".format(x, y)
+                lbl_text = "Node {}".format(n)
                 self.logger.debug("lbl_name = %s, lbl_text = %s", lbl_name, lbl_text)
                 self.app.addLabel(lbl_name, lbl_text, x, y)
 
     def handle_messages(self):
+        """Handles the incoming messages in the queue and notifies the gui.
+        """
+
         while True:
             message = None
             try:
                 message = self.result_q.get()
                 self.logger.debug("Got a new message %s, processing it...", message)
+                if "--QUIT--" in str(message):
+                    self.app.queueFunction(self.app.stop)
+                    return
                 self.counter += 1
                 n = int(float(message))
                 row = math.ceil(n / self.cols) - 1
-                col = n - (row * self.cols) - 1
+                #col = n - (row * self.cols) - 1
                 lbl_name = "l{}".format(n)
-                lbl_text = "row={}\ncolumn={} - count = {}".format(row, col, self.counter)
+                lbl_text = "Node {}\ncount = {}".format(n, self.counter)
                 self.app.queueFunction(self.app.setLabel, lbl_name, lbl_text)
+                self.app.queueFunction(self.app.setLabelBg, lbl_name, choice(self.colours))
             except queue.Empty:
                 continue
