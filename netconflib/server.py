@@ -88,7 +88,7 @@ class Server:
 
         while self.is_active:
             client_input = self.receive_input(connection, max_buffer_size)
-            if "--QUIT--" in client_input:
+            if Commands.quit_string in client_input:
                 self.logger.info("Client is requesting to quit")
                 connection.close()
                 self.logger.info("Connection " + ip + ":" + port + " closed")
@@ -114,7 +114,7 @@ class Server:
             self.logger.error("Connection lost to the remote host.")
             connection.close()
             self.is_active = False
-            return "--QUIT--"
+            return Commands.quit_string
 
         if client_input_size > max_buffer_size:
             self.logger.warning("The input size is greater than expected {}".format(
@@ -141,6 +141,9 @@ class Server:
             if node.address in input_str:
                 result = "Node {}".format(node.node_id)
                 self.result_q.put(node.node_id + 1)
+        if result == "":
+            self.is_active = False
+            result = Commands.quit_string
         return result
 
     def start_gui(self):

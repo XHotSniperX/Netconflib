@@ -19,6 +19,8 @@ class Commands:
     cmd_generate_cluster_key = "ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa"
     cmd_add_key_to_authorized_keys = "umask 077 && mkdir -p ~/.ssh && echo '{}' >> ~/.ssh/authorized_keys"
 
+    quit_string = "--QUIT--"
+
 class Paths:
     """This class holds all the paths.
     """
