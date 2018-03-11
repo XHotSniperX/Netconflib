@@ -89,7 +89,7 @@ class Server:
         while self.is_active:
             client_input = self.receive_input(connection, max_buffer_size)
             if Commands.quit_string in client_input:
-                self.logger.info("Client is requesting to quit")
+                self.logger.info("Client %s is requesting to quit", ip)
                 connection.close()
                 self.logger.info("Connection " + ip + ":" + port + " closed")
                 self.is_active = False
@@ -129,22 +129,44 @@ class Server:
         """Process the client's input.
         
         Arguments:
-            input_str {string} -- The input.
+            input_str {string} -- The input "counter address".
         
         Returns:
             string -- The result of the processing.
         """
 
-        self.logger.info("Processing the input from the client...")
-        result = ""
-        for node in self.ncl.topology.nodes:
-            if node.address in input_str:
-                result = "Node {}".format(node.node_id)
-                self.result_q.put(node.node_id + 1)
+        input_array = input_str.split(" ")
+        if len(input_array) != 2:
+            self.logger.warning("Not expected message '%s' from client", input_str)
+            return Commands.quit_string
+        name, nid = self.get_node_name_and_id(input_array[1])
+        self.logger.info("Processing the input from client '%s'...", name)
+        result = name
+        self.result_q.put([nid + 1, input_array[0]])
+
         if result == "":
             self.is_active = False
             result = Commands.quit_string
         return result
+
+    def get_node_name_and_id(self, ip):
+        """Returns the node's name and id that matches the ip.
+        
+        Arguments:
+            ip {string} -- The node's ip.
+        
+        Returns:
+            string -- The node's name.
+            integer -- The node's id.
+        """
+
+        name = "unknown"
+        nid = 0
+        for node in self.ncl.topology.nodes:
+            if node.address in ip:
+                name = node.name
+                nid = node.node_id
+        return name, nid
 
     def start_gui(self):
         """Starts the gui in main loop.

@@ -7,6 +7,7 @@ from threading import Thread
 from queue import Queue
 sys.path.append('../netconflib')
 from netconflib.gui import GUI
+from netconflib.commands import Commands
 
 class TestGUI(unittest.TestCase):
     """Tests the graphical user interface of Netconfig's sniffing.
@@ -35,14 +36,14 @@ class TestGUI(unittest.TestCase):
         """Simulates work and calls the gui.
         
         Arguments:
-            q {[type]} -- [description]
-            n {[type]} -- [description]
+            q {Queue} -- The communication queue for the gui.
+            n {integer} -- The number of nodes.
         """
 
-        for _ in range(10):
-            q.put(randint(1, n))
+        for x in range(10):
+            q.put([randint(1, n), x])
             time.sleep(1)
-        q.put("--QUIT--")
+        q.put([Commands.quit_string, 0])
 
 if __name__ == '__main__':
     LOGGER = logging.getLogger('test')

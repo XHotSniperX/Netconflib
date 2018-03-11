@@ -20,7 +20,6 @@ class GUI():
         self.result_q = result_q
 
         self.colours = ["red", "blue", "green", "orange", "yellow", "PapayaWhip", "white", "brown"]
-        self.counter = 0
         self.node_num = node_num
         self.cols = 1
         self.rows = 1
@@ -73,16 +72,17 @@ class GUI():
             message = None
             try:
                 message = self.result_q.get()
-                self.logger.debug("Got a new message %s, processing it...", message)
-                if "--QUIT--" in str(message):
+                message_str = ''.join(str(e) for e in message)
+                self.logger.debug("Got a new message '%s', processing it...", message_str)
+                if "--QUIT--" in str(message_str):
                     self.app.queueFunction(self.app.stop)
                     return
-                self.counter += 1
-                n = int(float(message))
+                n = int(float(message[0]))
+                counter = int(float(message[1]))
                 #row = math.ceil(n / self.cols) - 1
                 #col = n - (row * self.cols) - 1
                 lbl_name = "l{}".format(n)
-                lbl_text = "Node {}\ncount = {}".format(n, self.counter)
+                lbl_text = "Node {}\ncount = {}".format(n, counter)
                 self.app.queueFunction(self.app.setLabel, lbl_name, lbl_text)
                 self.app.queueFunction(self.app.setLabelBg, lbl_name, choice(self.colours))
             except queue.Empty:
