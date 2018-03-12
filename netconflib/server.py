@@ -20,14 +20,19 @@ class Server:
     and listens to all the clients.
     """
 
-    def __init__(self, port):
+    def __init__(self, port, test=False):
         self.logger = logging.getLogger('app.netconflib.server')
         self.logger.info("Starting server...")
 
         # My ip address
         self.local_address = get_my_ip()
 
-        self.ncl = NetConf(Paths.config_file)
+        cfg = None
+        if test:
+            cfg = Paths.config_file_test
+        else:
+            cfg = Paths.config_file
+        self.ncl = NetConf(cfg)
         self.num_nodes = self.ncl.topology.get_nodes_count()
 
         self.threads = []
