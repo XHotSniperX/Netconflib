@@ -62,7 +62,7 @@ testing=no
                         help="configure the cluster's network topology as a star")
     parser.add_argument('-tree', nargs=2, type=int, metavar=('ROOT', 'DEGREE'),
                         help="configure the cluster's network topology as a tree (-tree <root> <degree>)")
-    parser.add_argument('--version', action='version', version='Netconf  v0.9.3')
+    parser.add_argument('--version', action='version', version='Netconf  v0.9.4')
 
     return parser.parse_args()
 
@@ -108,7 +108,7 @@ def main(args=None):
         else:
             configfile = args.config[0]
     if args.server is not None:
-        server = Server(args.server)
+        server = Server(args.server, configfile=configfile)
         server.start_server()
     elif args.sniff is not None:
         client = Client((args.sniff[0], int(float(args.sniff[1]))))

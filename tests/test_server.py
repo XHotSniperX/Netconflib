@@ -5,6 +5,7 @@ import socket
 sys.path.append('../netconflib')
 import netconflib.helper as hlp
 from netconflib.server import Server
+from netconflib.commands import Paths
 
 class TestGUI(unittest.TestCase):
     """Tests the server.
@@ -23,7 +24,7 @@ class TestGUI(unittest.TestCase):
         """
 
         my_ip = self.get_my_ip()
-        s = Server(10006, test=True)
+        s = Server(10006, configfile=Paths.config_file_test)
         server_ip = s.local_address
 
         self.assertIsNotNone(s)
