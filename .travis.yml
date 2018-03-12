@@ -11,9 +11,9 @@ install:
   - pip install pytest pytest-cov
   - pip install -e .
 # command to run tests
-script: 
-  - pytest --cov=./
+script:
   - xvfb-run --server-args="-screen 0 1280x1024x16" make test
+  - pytest --cov=./
 
 after_success:
   - codecov
