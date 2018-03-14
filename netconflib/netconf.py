@@ -241,6 +241,9 @@ class NetConf:
         This is a helper method, to automatically start SSH sessions.
         """
 
+        if self.topology.get_node(id) is None:
+            self.logger.warning("Specified node id %d does not exist. Exiting...", id)
+            return
         cmd = ""
         if platform == "linux" or platform == "linux2":
             cmd = Commands.cmd_start_shell_lin
