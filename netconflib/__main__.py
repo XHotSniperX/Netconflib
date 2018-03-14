@@ -5,8 +5,8 @@ from .server import Server
 from .client import Client
 from pathlib import Path
 from .helper import get_my_ip
-from .commands import Commands
-from .commands import Paths
+from .constants import Commands
+from .constants import Paths
 
 def init_parser():
     """Initializes the argument parser.
@@ -77,7 +77,7 @@ def configure_logging(args):
     logger = logging.getLogger('app')
     logger.propagate = False
     logger.setLevel(logging.DEBUG)
-    f_handler = logging.FileHandler('app.log')
+    f_handler = logging.FileHandler(Paths.log_file)
     f_handler.setLevel(logging.DEBUG)
     c_handler = logging.StreamHandler()
     if args.verbose:
@@ -97,6 +97,7 @@ def main(args=None):
     """Runs the configurator.
     """
 
+    Path(str(Paths.program_home)).mkdir(parents=True, exist_ok=True)
     args = init_parser()
     configure_logging(args)
 

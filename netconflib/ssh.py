@@ -11,16 +11,14 @@ import shlex
 import logging
 import threading, queue
 from paramiko import client, Transport, RSAKey, Ed25519Key
-from .commands import Commands
+from .constants import Commands
+from .constants import Paths
 
 outlock = threading.Lock()
 
 class SSH:
     """This class provides SSH functionality.
     """
-
-    PRIVATE_KEY_FILE = "key"
-    PUBLIC_KEY_FILE = "key.pub"
 
     def __init__(self, address, username, password, shell=False):
         self.logger = logging.getLogger('app.netconflib.ssh')
@@ -30,6 +28,8 @@ class SSH:
         self.client = client.SSHClient()
         #self.setup_ssh(username, password)
 
+        if not self.private_key_exists():
+            self.generate_key()
         self.threadpool = []
         thread = threading.Thread(target=self.setup_ssh, args=(username, password))
         thread.start()
@@ -120,8 +120,6 @@ class SSH:
         """
 
         self.client.set_missing_host_key_policy(client.AutoAddPolicy())
-        if not self.private_key_exists():
-            self.generate_key()
         self.share_key_with_host(self.get_public_key(), username, password)
         self.close_connection()
 
@@ -184,8 +182,8 @@ class SSH:
                 .format(key))
         if not self.check_host_key(key):
             self.logger.error("Key sharing failed, deleting local key...")
-            os.remove(self.PRIVATE_KEY_FILE)
-            os.remove(self.PUBLIC_KEY_FILE)
+            os.remove(Paths.private_key_file)
+            os.remove(Paths.public_key_file)
 
     def generate_key(self):
         """Generates an OpenSSH key for SSH authentication.
@@ -195,15 +193,16 @@ class SSH:
         if platform == "linux" or platform == "linux2" or platform == "darwin":
             self.logger.debug("Generating new ssh-rsa key...")
             key = RSAKey.generate(2048)
-            key.write_private_key_file(self.PRIVATE_KEY_FILE)
+            key.write_private_key_file(Paths.private_key_file)
         elif platform == "win32":
             self.logger.debug("Generating new ssh-ed25519 key...")
-            args = shlex.split(Commands.cmd_generate_ed25519_key.format(self.PRIVATE_KEY_FILE))
+            args = shlex.split(Commands.cmd_generate_ed25519_key.format(Paths.private_key_file).replace("\\", "/"))
+            #args = Commands.cmd_generate_ed25519_key.format(Paths.private_key_file)
             self.logger.debug(args)
             subprocess.run(args)
             #process = Popen("cmd.exe", shell=False, universal_newlines=True,
             #      stdin=PIPE, stdout=PIPE, stderr=PIPE)
-            #process.communicate(Commands.cmd_generate_ed25519_key.format(self.PRIVATE_KEY_FILE))
+            #process.communicate(Commands.cmd_generate_ed25519_key.format(Paths.private_key_file))
 
     def generate_remote_ssh_key(self):
         """Generates an ssh key pair on the cluster node.
@@ -218,7 +217,7 @@ class SSH:
             boolean -- True, if exists, False otherwise.
         """
 
-        if os.path.isfile(self.PRIVATE_KEY_FILE):
+        if os.path.isfile(Paths.private_key_file):
             return True
         else:
             return False
@@ -233,9 +232,9 @@ class SSH:
 
         if self.private_key_exists:
             if platform == "linux" or platform == "linux2" or platform == "darwin":
-                return RSAKey.from_private_key_file(self.PRIVATE_KEY_FILE)
+                return RSAKey.from_private_key_file(Paths.private_key_file)
             elif platform == "win32":
-                return Ed25519Key.from_private_key_file(self.PRIVATE_KEY_FILE)                 
+                return Ed25519Key.from_private_key_file(Paths.private_key_file)                 
         else:
             return None
 
@@ -253,7 +252,7 @@ class SSH:
                 key = self.get_private_key()
                 p_key = "ssh-rsa {}".format(key.get_base64())
             elif platform == "win32":
-                with open (self.PUBLIC_KEY_FILE, "r") as pfile:
+                with open (Paths.public_key_file, "r") as pfile:
                     key = pfile.readline().strip()
                 p_key = key
         return p_key

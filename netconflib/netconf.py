@@ -9,13 +9,14 @@ import subprocess
 from sys import platform
 import configparser
 import logging
+from pathlib import Path
 from treelib import Tree
 from paramiko import BadHostKeyException
 from paramiko import AuthenticationException
 from paramiko import SSHException
 from .ssh import SSH
-from .commands import Commands
-from .commands import Paths
+from .constants import Commands
+from .constants import Paths
 
 class NetConf:
     """Configuration library
@@ -25,6 +26,7 @@ class NetConf:
     """
 
     def __init__(self, configfile=None):
+        Path(str(Paths.program_home)).mkdir(parents=True, exist_ok=True)
         self.logger = logging.getLogger('app.netconflib.NetConf')
         self.logger.info("Starting linux network configuration...")
         self.config = self.init_config(configfile)
@@ -54,14 +56,15 @@ class NetConf:
 
         config = configparser.ConfigParser()
         if configfile is None:
-            self.create_default_config_file()
+            if not os.path.isfile(Paths.config_file):
+                self.create_default_config_file()
             config.read(Paths.config_file)
         else:
             config.read(configfile)
         return config
     
     def create_default_config_file(self):
-        """Creates a new default config file in program folder.
+        """Creates a new default config file in program folder in home.
         """
 
         config = configparser.ConfigParser()
@@ -227,10 +230,10 @@ class NetConf:
                                          stderr=subprocess.PIPE,
                                          universal_newlines=True)
                     p.communicate(cmd
-                                  .format(os.path.abspath(SSH.PRIVATE_KEY_FILE), node.address))
+                                  .format(os.path.abspath(Paths.private_key_file), node.address))
                 else:
                     subprocess.Popen(cmd
-                                     .format(os.path.abspath(SSH.PRIVATE_KEY_FILE),
+                                     .format(os.path.abspath(Paths.private_key_file),
                                              node.address), shell=True)
 
     def open_shell(self, id):
@@ -254,11 +257,11 @@ class NetConf:
                                          stderr=subprocess.PIPE,
                                          universal_newlines=True)
                     _, _ = p.communicate(cmd
-                                         .format(os.path.abspath(SSH.PRIVATE_KEY_FILE),
+                                         .format(os.path.abspath(Paths.private_key_file),
                                                  self.topology.get_node(id).address))
             else:
                 subprocess.Popen(cmd
-                                 .format(os.path.abspath(SSH.PRIVATE_KEY_FILE),
+                                 .format(os.path.abspath(Paths.private_key_file),
                                          self.topology.get_node(id).address), shell=True)
 
     def execute_command_on_all(self, cmd):

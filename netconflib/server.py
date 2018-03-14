@@ -11,8 +11,8 @@ from queue import Queue
 import traceback
 from .helper import get_my_ip
 from .netconf import NetConf
-from .commands import Commands
-from .commands import Paths
+from .constants import Commands
+from .constants import Paths
 from .gui import GUI
 
 class Server:

@@ -2,12 +2,14 @@ import unittest
 import sys
 import logging
 import time
+from pathlib import Path
 from random import randint
 from threading import Thread
 from queue import Queue
 sys.path.append('../netconflib')
 from netconflib.gui import GUI
-from netconflib.commands import Commands
+from netconflib.constants import Commands
+from netconflib.constants import Paths
 
 class TestGUI(unittest.TestCase):
     """Tests the graphical user interface of Netconfig's sniffing.
@@ -46,9 +48,10 @@ class TestGUI(unittest.TestCase):
         q.put([Commands.quit_string, 0])
 
 if __name__ == '__main__':
+    Path(str(Paths.program_home)).mkdir(parents=True, exist_ok=True)
     LOGGER = logging.getLogger('test')
     LOGGER.setLevel(logging.INFO)
-    FH = logging.FileHandler('test.log')
+    FH = logging.FileHandler(Paths.log_file_test)
     FH.setLevel(logging.INFO)
     CH = logging.StreamHandler()
     CH.setLevel(logging.INFO)

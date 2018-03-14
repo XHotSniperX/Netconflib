@@ -1,17 +1,18 @@
 import unittest
 import sys
+import os
 import logging
 import configparser
+from pathlib import Path
 sys.path.append('../netconflib')
 from netconflib.netconf import NetConf
-from netconflib.commands import Paths
+from netconflib.constants import Paths
 from collections import Counter
 
 class TestConfigurationMethods(unittest.TestCase):
     """Tests the configuration methods of NetConf.
     """
 
-    CONFIG_PATH = Paths.config_file_test
     MAX_NUM = 10
     MAX_DEGREE = 1
     config = None
@@ -74,8 +75,14 @@ class TestConfigurationMethods(unittest.TestCase):
             node_count {integer} -- The number of nodes.
         """
 
+        config_path = None
+        if os.path.isfile(Paths.config_file_test):
+            config_path = Paths.config_file_test
+        else:
+            config_path = Paths.config_file_test_programfolder
+
         self.config = configparser.ConfigParser()
-        config_file = open(self.CONFIG_PATH, "r")
+        config_file = open(config_path, "r")
         self.config.read_file(config_file)
         config_file.close()
         if testing:
@@ -88,16 +95,17 @@ class TestConfigurationMethods(unittest.TestCase):
             host = "node{}".format(i + 1)
             address = "10.0.1.{}".format(i + 1)
             self.config.set("hosts", host, address)
-        config_file = open(self.CONFIG_PATH, "w")
+        config_file = open(config_path, "w")
         self.config.write(config_file)
         config_file.close()
-        self.ncl = NetConf(self.CONFIG_PATH)
+        self.ncl = NetConf(config_path)
 
 
 if __name__ == '__main__':
+    Path(str(Paths.program_home)).mkdir(parents=True, exist_ok=True)
     LOGGER = logging.getLogger('test')
     LOGGER.setLevel(logging.INFO)
-    FH = logging.FileHandler('test.log')
+    FH = logging.FileHandler(Paths.log_file_test)
     FH.setLevel(logging.INFO)
     CH = logging.StreamHandler()
     CH.setLevel(logging.INFO)

@@ -1,4 +1,6 @@
-"""This module encapsulates constant shell commands."""
+"""This module encapsulates constants."""
+
+from pathlib import Path
 
 class Commands:
     """This class holds many shell commands.
@@ -25,5 +27,12 @@ class Paths:
     """This class holds all the paths.
     """
 
-    config_file = "netconflib/config.ini"
-    config_file_test = "tests/config.ini"
+    home = Path.home()
+    program_home = home / "netconflib"
+    config_file = str(program_home / "config.ini")
+    config_file_test = str(program_home / "config_test.ini")
+    config_file_test_programfolder = "tests/config.ini"
+    private_key_file = str(program_home / "key")
+    public_key_file = str(program_home / "key.pub")
+    log_file = str(program_home / "app.log")
+    log_file_test = str(program_home / "test.log")

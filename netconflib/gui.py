@@ -23,7 +23,7 @@ class GUI():
         self.node_num = node_num
         self.cols = 1
         self.rows = 1
-        self.app = gui(title="Netconfig", geom="1000x1000", handleArgs=False)
+        self.app = gui(title="Netconfig", geom="500x500", handleArgs=False, showIcon=False)
         self.init_gui()
 
     def run(self):
@@ -39,6 +39,7 @@ class GUI():
 
         self.app.setSticky("news")
         self.app.setExpand("both")
+        self.app.setResizable(canResize=True)
         self.build_grid(self.node_num)
 
     def build_grid(self, size):
