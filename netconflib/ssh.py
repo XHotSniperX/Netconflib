@@ -173,7 +173,7 @@ class SSH:
             password {string} -- The host's password.
         """
 
-        self.logger.info("Sharing key with host %s...", self.address)
+        self.logger.debug("Sharing key with host %s...", self.address)
         if username is not None:
             self.client.connect(self.address, username=username,
                             password=password)

@@ -298,6 +298,7 @@ class NetConf:
         for nodex in self.topology.nodes:
             public_key = nodex.connection.get_public_key_from_remote()
             for nodey in self.topology.nodes:
+                self.logger.info("Sharing key from %s with %s...", nodex.name, nodey.name)
                 nodey.connection.share_key_with_host(public_key)
 
 class Node:
