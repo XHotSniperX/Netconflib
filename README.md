@@ -35,7 +35,7 @@ Please check the requirements stated below to make sure that everything runs fin
 
 Windows | macOS | Linux
 ---------|----------|---------
- 0.3+ | 0.3+ | 0.3+
+ 10 version 1709+ | 10.13+ | Ubuntu 17.10+
 
 ### Python
 

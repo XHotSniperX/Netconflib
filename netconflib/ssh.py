@@ -271,9 +271,9 @@ class SSH:
         if self.check_cluster_key_generated():
             public_key = self.send_command(Commands.cmd_get_public_key_from_node)
         else:
-            self.logger.error("Remote node doesn not have ssh key.")
+            self.logger.error("Remote node does not have ssh key.")
 
-        return public_key
+        return public_key.replace("\n", "")
 
     def close_connection(self):
         """Closes the connection to the SSH host.

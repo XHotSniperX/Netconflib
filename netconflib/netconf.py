@@ -298,8 +298,6 @@ class NetConf:
         for nodex in self.topology.nodes:
             public_key = nodex.connection.get_public_key_from_remote()
             for nodey in self.topology.nodes:
-                if nodex.node_id == nodey.node_id:
-                    continue
                 nodey.connection.share_key_with_host(public_key)
 
 class Node:
