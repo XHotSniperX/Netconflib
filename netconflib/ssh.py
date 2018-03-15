@@ -59,7 +59,7 @@ class SSH:
         result = ""
         out_queue = queue.Queue()
         if self.client:
-            self.logger.debug("Executing command: %s", command)
+            self.logger.debug("Executing command on %s: %s", self.address, command)
             thread = threading.Thread(target=self.process_data, args=(command, out_queue))
             thread.start()
             if block:
@@ -85,18 +85,18 @@ class SSH:
         """Processes the data in the communication channel.
         
         Arguments:
-            stdout {[type]} -- [description]
-            stderr {[type]} -- [description]
+            cmd {string} -- Command.
+            out_queue {Queue} -- Output queue.
         """
 
         result = ""
         _, stdout, stderr = self.client.exec_command(cmd, get_pty=True)
         for line in iter(stdout.readline, ""):
             result += line
-            self.logger.debug(line)
+            self.logger.debug("%s: %s", self.address, line.replace("\n", ""))
         for line in iter(stderr.readline, ""):
             result += line
-            self.logger.debug(line)
+            self.logger.debug("%s: %s", self.address, line.replace("\n", ""))
         out_queue.put(result)
 
     def process(self):
@@ -137,13 +137,13 @@ class SSH:
         """
 
         cmd = Commands.cmd_check_key.format(key)
-        self.logger.debug("Check command: %s", cmd)
+        self.logger.debug("Checking, if the host %s contains the key...", self.address)
         output = self.send_command(cmd)
         if "0" in output:
-            self.logger.debug("The host already has this key.")
+            self.logger.debug("The host %s already has this key.", self.address)
             return True
         else:
-            self.logger.debug("The host does not have this key.")
+            self.logger.debug("The host %s does not have this key.", self.address)
             return False
 
     def check_cluster_key_generated(self):
@@ -154,14 +154,14 @@ class SSH:
         """
 
         cmd = Commands.cmd_check_key_cluster
-        self.logger.debug("Check command: %s", cmd)
+        self.logger.debug("Checking, if the host %s has an id_rsa key...", self.address)
         output = self.send_command(cmd)
-        if "found" in output:
-            self.logger.debug("The host has already generated an SSH key.")
-            return True
-        else:
-            self.logger.debug("The host does not have an SSH key yet.")
+        if "not found" in output:
+            self.logger.debug("The host %s does not have an SSH key yet.", self.address)
             return False
+        else:
+            self.logger.debug("The host %s has already generated an SSH key.", self.address)
+            return True
 
     def share_key_with_host(self, key, username=None, password=None):
         """Saves the provided key (public part) on the server.
@@ -173,15 +173,16 @@ class SSH:
             password {string} -- The host's password.
         """
 
+        self.logger.info("Sharing key with host %s...", self.address)
         if username is not None:
             self.client.connect(self.address, username=username,
                             password=password)
         if not self.check_host_key(key):
-            self.logger.debug("Adding public key to the host's authorized_keys...")
+            self.logger.debug("Adding public key to the %s host's authorized_keys...", self.address)
             self.send_command(Commands.cmd_add_key_to_authorized_keys
                 .format(key))
         if not self.check_host_key(key):
-            self.logger.error("Key sharing failed, deleting local key...")
+            self.logger.error("Key sharing failed with %s, deleting local key...", self.address)
             os.remove(Paths.private_key_file)
             os.remove(Paths.public_key_file)
 
@@ -208,6 +209,7 @@ class SSH:
         """Generates an ssh key pair on the cluster node.
         """
 
+        self.logger.info("Generating ssh key pair on remote node %s...", self.address)
         self.send_command(Commands.cmd_generate_cluster_key)
 
     def private_key_exists(self):
@@ -267,11 +269,12 @@ class SSH:
 
         public_key = ""
 
-        self.logger.debug("Fetching the public ssh key from remote node...")
-        if self.check_cluster_key_generated():
-            public_key = self.send_command(Commands.cmd_get_public_key_from_node)
-        else:
-            self.logger.error("Remote node does not have ssh key.")
+        self.logger.debug("Fetching the public ssh key from remote node %s...", self.address)
+        if not self.check_cluster_key_generated():
+            self.logger.debug("Remote node %s does not have ssh key yet. Generating...", self.address)
+            self.generate_remote_ssh_key()
+
+        public_key = self.send_command(Commands.cmd_get_public_key_from_node)
 
         return public_key.replace("\n", "")
 
