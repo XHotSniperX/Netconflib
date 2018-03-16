@@ -223,6 +223,7 @@ class NetConf:
 
         if cmd is not "":
             for node in self.topology.nodes:
+                self.logger.info("Opening ssh shell to %s...", node.name)
                 if platform == "darwin":
                     p = subprocess.Popen(['osascript', '-'],
                                          stdin=subprocess.PIPE,
@@ -241,6 +242,7 @@ class NetConf:
         This is a helper method, to automatically start SSH sessions.
         """
 
+        self.logger.info("Opening ssh shell to node %d...", id)
         if self.topology.get_node(id) is None:
             self.logger.warning("Specified node id %d does not exist. Exiting...", id)
             return
@@ -280,6 +282,7 @@ class NetConf:
         """Setups the ssh keys for cluster internal communication.
         """
 
+        self.logger.info("Setting up ssh configuration on cluster...")
         self.generate_ssh_keys_on_cluster()
         self.exchange_ssh_public_keys_on_cluster()
 
