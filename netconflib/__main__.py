@@ -38,30 +38,36 @@ testing=no
 '''
     parser.add_argument("-config", nargs=1, type=str, metavar=('CONFIG-PATH'),
                         help=config_help)
-    parser.add_argument('--verbose', action='store_true',
-                        help='print debug information (default: only info and error)')
     parser.add_argument('-server', nargs='?', const=10000, type=int, metavar=('PORT'),
-                        help='start server for client sniffing (sepcify port with -server <PORT>, defualt: 10000)')
+                        help='Start server for client sniffing (sepcify port with -server <PORT>, defualt: 10000).')
     parser.add_argument('-client', nargs='?', const=10000, type=int, metavar=('PORT'),
-                        help='start clients for sniffing (sepcify port with -client <PORT>, defualt: 10000)')
+                        help='Start clients for sniffing (sepcify port with -client <PORT>, defualt: 10000).')
     parser.add_argument('-sniff', nargs=2, type=str, metavar=('SERVER-ADDRESS', 'PORT'),
-                        help='start sniffing on the network interface (-sniff <server address> <port>)')
+                        help='Start sniffing on the network interface (-sniff <server address> <port>).')
     parser.add_argument('-shells', action='store_true',
-                        help='open shells to all cluster nodes')
+                        help='Open shells to all cluster nodes.')
     parser.add_argument('-shell', nargs=1, type=int, metavar=('NODE-ID'),
-                        help="open shell to cluster node with id")
+                        help="Open shell to cluster node with id.")
     parser.add_argument('-ipforward', action='store_true',
-                        help="enable ip forwarding on every node of the cluster")
+                        help="Enable ip forwarding on every node of the cluster.")
     parser.add_argument('-sshsetup', action='store_true',
-                        help="setup ssh keys for internal communication on the cluster")
+                        help="Setup ssh keys for internal communication on the cluster.")
     parser.add_argument('-updatehosts', action='store_true',
-                        help="updates the hosts file of every node of the cluster")
+                        help="Updates the hosts file of every node of the cluster.")
     parser.add_argument('-ring', action='store_true',
-                        help="configure the cluster's network topology as a ring")
-    parser.add_argument('-star', action='store_true',
-                        help="configure the cluster's network topology as a star")
+                        help="Configure the cluster's network topology as a ring.")
+    parser.add_argument('-removering', action='store_true',
+                        help="Remove the cluster's ring network topology. Use only after having configured a ring.")
+    parser.add_argument('-star', nargs='?', const=0, type=int, metavar=('CENTER'),
+                        help="Configure the cluster's network topology as a star (-star <center>). Default center = 0.")
+    parser.add_argument('-removestar', nargs='?', const=0, type=int, metavar=('CENTER'),
+                        help="Remove the cluster's star network topology (-removestar <center>). Default center = 0.")
     parser.add_argument('-tree', nargs=2, type=int, metavar=('ROOT', 'DEGREE'),
-                        help="configure the cluster's network topology as a tree (-tree <root> <degree>)")
+                        help="Configure the cluster's network topology as a tree (-tree <root> <degree>).")
+    parser.add_argument('-removetree', nargs=2, type=int, metavar=('ROOT', 'DEGREE'),
+                        help="Remove the cluster's tree network topology (-removetree <root> <degree>).")
+    parser.add_argument('--verbose', action='store_true',
+                        help='Print debug information (default: only info and error).')
     parser.add_argument('--version', action='version', version='Netconf  v0.9.8')
 
     return parser.parse_args()
@@ -128,12 +134,22 @@ def main(args=None):
             ncl.update_hosts_file()
         elif args.ring:
             ncl.configure_ring_topology()
-        elif args.star:
-            ncl.configure_star_topology(0)
+        elif args.removering:
+            ncl.configure_ring_topology(remove=True)
+        elif args.star is not None:
+            center = args.star[0]
+            ncl.configure_star_topology(center)
+        elif args.removestar is not None:
+            center = args.removestar[0]
+            ncl.configure_star_topology(center, remove=True)
         elif args.tree is not None:
             root = args.tree[0]
             degree = args.tree[1]
             ncl.configure_tree_topology(root, degree)
+        elif args.removetree is not None:
+            root = args.removetree[0]
+            degree = args.removetree[1]
+            ncl.configure_tree_topology(root, degree, remove=True)
         elif args.client is not None:
             logging.info("Starting the clients on the cluster...")
             cmd = Commands.cmd_start_client.format(get_my_ip(), args.client)
