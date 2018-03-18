@@ -91,10 +91,12 @@ class NetConf:
         """Appends all the ip addresses and host names to etc/hosts file.
         """
 
+        self.logger.info("Preparing hosts files for cluster...")
         for nodex in self.topology.nodes:
             for nodey in self.topology.nodes:
                 nodex.add_host(nodey)
 
+        self.logger.info("Updating hosts files on cluster...")
         if not self.testing:
             self.topology.send_all_hosts()
 
@@ -111,6 +113,7 @@ class NetConf:
             remove {boolean} -- Remove the configuration (default: {False})
         """
 
+        self.logger.info("Configuring ring topology...")
         for nodex in self.topology.nodes:
             for nodey in self.topology.nodes:
                 if nodex.node_id == nodey.node_id:
@@ -134,6 +137,7 @@ class NetConf:
             remove {boolean} -- Remove the configuration (default: {False})
         """
 
+        self.logger.info("Configuring star topology...")
         center_node = self.topology.get_node(center)
         for nodex in self.topology.nodes:
             self.logger.debug("%s:", nodex.name)
@@ -168,6 +172,7 @@ class NetConf:
             remove {boolean} -- Remove the configuration (default: {False})
         """
 
+        self.logger.info("Configuring tree topology...")
         tree = Tree()
         root_node = self.topology.get_node(root)
         tree.create_node(root_node.name, root_node.node_id)
@@ -290,6 +295,7 @@ class NetConf:
         """Generates ssh rsa key pairs on all nodes on the cluster.
         """
 
+        self.logger.info("Generating ssh rsa key pairs on cluster...")
         for node in self.topology.nodes:
             if not node.connection.check_cluster_key_generated():
                 node.connection.generate_remote_ssh_key()
@@ -496,6 +502,7 @@ class Topology:
         """
 
         for node in self.nodes:
+            self.logger.info("Updating forwarding table for %s...", node.name)
             node.send_forwarding_table(remove)
 
     def send_all_hosts(self):
@@ -503,6 +510,7 @@ class Topology:
         """
 
         for node in self.nodes:
+            self.logger.info("Updating hosts file on %s...", node.name)
             node.send_hosts()
 
     def send_command_to_all(self, cmd):
