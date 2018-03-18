@@ -9,7 +9,7 @@ class Commands:
     """
 
     cmd_echo = "echo hello"
-    cmd_ipforward = "sysctl -w net.ipv4.ip_forward=1"
+    cmd_ipforward = "sudo sysctl -w net.ipv4.ip_forward=1"
     cmd_check_key = "grep -q '{}' ~/.ssh/authorized_keys && echo $?"
     cmd_check_key_cluster = "[ -f ~/.ssh/id_rsa ] && echo 'found' || echo 'not found'"
     cmd_get_public_key_from_node = 'echo "$(cat ~/.ssh/id_rsa.pub)"'
