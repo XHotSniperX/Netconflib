@@ -8,6 +8,7 @@ from random import choice
 import logging
 from appJar import gui
 import math
+from .constants import Commands
 
 class GUI():
     """This class holds the gui.
@@ -30,7 +31,9 @@ class GUI():
         """Starts the gui.
         """
 
-        self.app.thread(self.handle_messages)
+        #self.app.thread(self.handle_messages_queued)
+        self.app.registerEvent(self.handle_messages_fast)
+        self.app.setPollTime(50)
         self.app.go()
 
     def init_gui(self):
@@ -65,8 +68,9 @@ class GUI():
                 self.logger.debug("lbl_name = %s, lbl_text = %s", lbl_name, lbl_text)
                 self.app.addLabel(lbl_name, lbl_text, x, y)
 
-    def handle_messages(self):
-        """Handles the incoming messages in the queue and notifies the gui.
+    def handle_messages_queued(self):
+        """Handles the incoming messages in the queue and adds updates to the gui event queue.
+        Use handle_messages_fast for more frequent updates.
         """
 
         while True:
@@ -75,7 +79,7 @@ class GUI():
                 message = self.result_q.get()
                 message_str = ''.join(str(e) for e in message)
                 self.logger.debug("Got a new message '%s', processing it...", message_str)
-                if "--QUIT--" in str(message_str):
+                if Commands.quit_string in str(message_str):
                     self.app.queueFunction(self.app.stop)
                     return
                 n = int(float(message[0]))
@@ -88,3 +92,27 @@ class GUI():
                 self.app.queueFunction(self.app.setLabelBg, lbl_name, choice(self.colours))
             except queue.Empty:
                 continue
+
+    def handle_messages_fast(self):
+        """Handles the incoming messages in the queue and notifies the gui.
+        This method is faster than handle_messages_queued and updates the gui more often.
+        """
+
+        message = None
+        try:
+            message = self.result_q.get(block=False)
+            message_str = ''.join(str(e) for e in message)
+            self.logger.debug("Got a new message '%s', processing it...", message_str)
+            if Commands.quit_string in str(message_str):
+                self.app.stop()
+                return
+            n = int(float(message[0]))
+            counter = int(float(message[1]))
+            #row = math.ceil(n / self.cols) - 1
+            #col = n - (row * self.cols) - 1
+            lbl_name = "l{}".format(n)
+            lbl_text = "Node {}\ncount = {}".format(n, counter)
+            self.app.setLabel(lbl_name, lbl_text)
+            self.app.setLabelBg(lbl_name, choice(self.colours))
+        except queue.Empty:
+            pass
