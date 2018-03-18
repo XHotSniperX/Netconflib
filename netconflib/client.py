@@ -61,7 +61,8 @@ class Client:
             msg {string} -- A message text.
         """
 
-        self.logger.debug('Sending {}'.format(msg))
+        msg = "{},".format(msg)
+        self.logger.debug('Sending "{}"'.format(msg))
         try:
             self.sock.sendall(msg.encode())
         except socket.error:

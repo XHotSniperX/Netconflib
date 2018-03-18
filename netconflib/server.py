@@ -135,16 +135,25 @@ class Server:
             string -- The result of the processing.
         """
 
+        result = ""
         if "Hello server" in input_str:
             return input_str
-        input_array = input_str.split(" ")
-        if len(input_array) != 2:
-            self.logger.warning("Not expected message '%s' from client", input_str)
-            return Commands.quit_string
-        name, nid = self.get_node_name_and_id(input_array[1])
-        self.logger.info("Processing the input from client '%s'...", name)
-        result = name
-        self.result_q.put([nid + 1, input_array[0]])
+        input_array = input_str.split(",")
+        messages = []
+        for msg in input_array:
+            if msg:
+                messages.append(msg)
+        if len(messages) > 1:
+            self.logger.info("Got multiple messages '%s' from client. Splitted it...", input_str)
+        for msg in messages:
+            msg_array = msg.split(" ")
+            if len(msg_array) != 2:
+                self.logger.warning("Not expected message '%s' from client", msg)
+                return Commands.quit_string
+            name, nid = self.get_node_name_and_id(msg_array[1])
+            self.logger.info("Processing the input from client '%s'...", name)
+            result += name + ": count=" + msg_array[0] + " "
+            self.result_q.put([nid + 1, msg_array[0]])
 
         if result == "":
             self.is_active = False
