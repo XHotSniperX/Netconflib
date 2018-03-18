@@ -68,7 +68,7 @@ testing=no
                         help="Remove the cluster's tree network topology (-removetree <root> <degree>).")
     parser.add_argument('--verbose', action='store_true',
                         help='Print debug information (default: only info and error).')
-    parser.add_argument('--version', action='version', version='Netconf  v0.9.8')
+    parser.add_argument('--version', action='version', version='Netconf  v0.9.9')
 
     return parser.parse_args()
 
@@ -137,10 +137,10 @@ def main(args=None):
         elif args.removering:
             ncl.configure_ring_topology(remove=True)
         elif args.star is not None:
-            center = args.star[0]
+            center = args.star
             ncl.configure_star_topology(center)
         elif args.removestar is not None:
-            center = args.removestar[0]
+            center = args.removestar
             ncl.configure_star_topology(center, remove=True)
         elif args.tree is not None:
             root = args.tree[0]
