@@ -82,9 +82,9 @@ class NetConf:
     def enable_ip_forwarding(self):
         """Enables ip packet forwarding on every node on the cluster."""
 
-        self.logger.info("Enabling IP packet forwarding...")
         for node in self.topology.nodes:
             if not self.testing and not node.connection is None:
+                self.logger.info("Enabling IP packet forwarding on %s...", node.name)
                 node.connection.send_command(Commands.cmd_ipforward)
 
     def update_hosts_file(self):

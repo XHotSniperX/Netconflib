@@ -96,7 +96,7 @@ class SSH:
             self.logger.debug("%s: %s", self.address, line.replace("\n", ""))
         for line in iter(stderr.readline, ""):
             result += line
-            self.logger.debug("%s: %s", self.address, line.replace("\n", ""))
+            self.logger.error("%s: %s", self.address, line.replace("\n", ""))
         out_queue.put(result)
 
     def process(self):
