@@ -16,8 +16,13 @@ A library for configuring the network topology of a Linux  cluster
     - [Summary](#summary)
     - [Requirements](#requirements)
         - [Platform](#platform)
-        - [Python](#python)
+        - [Windows specific](#windows-specific)
+        - [macOS specific](#macos-specific)
+        - [Linux specific (via apt-get)](#linux-specific-via-apt-get)
+    - [Installation](#installation)
     - [Usage](#usage)
+        - [Use it as an application](#use-it-as-an-application)
+        - [Use it as a library](#use-it-as-a-library)
     - [Roadmap](#roadmap)
     - [License](#license)
 
@@ -37,18 +42,64 @@ Windows | macOS | Linux
 ---------|----------|---------
  10 version 1709+ | 10.13+ | Ubuntu 17.10+
 
-### Python
+### Windows specific
 
-- Python 3.5
-- Python 3.6
+- Python 3.5+ incl. pip3 and Tk toolkit
+- Npcap 0.98+
+- OpenSSH client (activate it in your Windows settings under optional features)
+
+### macOS specific
+
+- Python 3.5+ incl. pip3 and Tk toolkit
+- tcpdump (should be installed already)
+
+### Linux specific (via apt-get)
+
+- Python 3.5+ incl. pip3 and Tk toolkit
+- tcpdump
+- build-essential
+- libssl-dev
+- libffi-dev
+- python3-pip
+- python3-dev
+- python3-tk
+
+## Installation
+
+After having prepared all the requirements listed above, you can install the software via one single command:
+
+```
+python pip install netconflib
+```
+
+or
+
+```
+python pip3 install netconflib
+```
+
+On the cluster, make sure to install it with `sudo` because it needs further rights for the sniffing part.
 
 ## Usage
 
-How to use the library...
+You can use Netconflib as a runnable application or as a Python library in your own Python software.
 
+### Use it as an application
+
+```
+python -m netconflib -h
+```
+
+### Use it as a library
+
+There are many function that you can use. Below are a few examples... All the functions are documented.
 ```python
-s = "Python syntax highlighting"
-print s
+from netconflib import netconf
+nc = netconf.NetConf() #don't forget to configure the config.ini in the app folder in your home directory
+nc.enable_ip_forwarding() #activates ip package forwarding on all cluster nodes
+nc.update_hosts_file() #updates the hosts file on all nodes with the names specified in config.ini
+nc.configure_tree_topology(0, 2) #configures the tree topology on your cluster
+nc.open_shell(1) #opens one new SSH enabled window to the node with id=1
 ```
 
 ## Roadmap
