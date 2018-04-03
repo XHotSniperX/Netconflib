@@ -90,6 +90,15 @@ You can use Netconflib as a runnable application or as a Python library in your 
 python -m netconflib -h
 ```
 
+You can also use the visualization to see the actual topology while sending ping packets. For this, you have to start both, the server and then the client on a controller PC. Don't forget to having configured everything before (installation, config.ini and the cluster).
+
+```
+python -m netconflib -server
+python -m netconflib -client
+```
+
+![The gui.](raw/master/images/gui2.PNG "GUI")
+
 ### Use it as a library
 
 There are many function that you can use. Below are a few examples... All the functions are documented.
