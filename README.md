@@ -97,7 +97,7 @@ python -m netconflib -server
 python -m netconflib -client
 ```
 
-![The gui.](raw/master/images/gui2.PNG "GUI")
+![The gui.](images/gui2.PNG "GUI")
 
 ### Use it as a library
 
