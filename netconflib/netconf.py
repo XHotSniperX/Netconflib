@@ -75,9 +75,19 @@ class NetConf:
                            'node4': '10.0.1.36'}
         config['authentication'] = {'username': 'pi',
                                     'password': 'raspberry'}
+        config['visualization'] = {'server_address': 'automatic'}
         config['settings'] = {'testing': 'no'}
         with open(Paths.config_file, 'w') as configfile:
             config.write(configfile)
+
+    def get_server_address(self):
+        """Returns the specified server address in config file.
+        """
+
+        result = "automatic"
+        if self.config.has_option("visualization", "server_address"):
+            result = self.config.get("visualization", "server_address")
+        return result
 
     def enable_ip_forwarding(self):
         """Enables ip packet forwarding on every node on the cluster."""

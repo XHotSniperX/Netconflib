@@ -33,6 +33,9 @@ node4=10.0.1.36
 username=pi
 password=raspberry
 
+[visualization]
+server_address=automatic
+
 [settings]
 testing=no
 '''
@@ -68,7 +71,7 @@ testing=no
                         help="Remove the cluster's tree network topology (-removetree <root> <degree>).")
     parser.add_argument('--verbose', action='store_true',
                         help='Print debug information (default: only info and error).')
-    parser.add_argument('--version', action='version', version='Netconf  v1.0.1')
+    parser.add_argument('--version', action='version', version='Netconf  v1.0.2')
 
     return parser.parse_args()
 
