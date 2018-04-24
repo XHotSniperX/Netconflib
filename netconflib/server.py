@@ -29,8 +29,8 @@ class Server:
 
         self.ncl = NetConf(configfile)
         self.num_nodes = self.ncl.topology.get_nodes_count()
-        if not self.ncl.get_server_address == "automatic":
-            self.local_address = self.ncl.get_server_address
+        if not self.ncl.get_server_address() == "automatic":
+            self.local_address = self.ncl.get_server_address()
 
         self.threads = []
         self.result_q = Queue()
