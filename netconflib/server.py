@@ -36,7 +36,7 @@ class Server:
         self.result_q = Queue()
         self.is_active = True
 
-        self.server_address = (get_my_ip(), port)
+        self.server_address = (self.local_address, port)
 
     def start_server(self):
         """Starts the server process which listens and accepts clients.
