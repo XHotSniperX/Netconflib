@@ -71,7 +71,7 @@ testing=no
                         help="Remove the cluster's tree network topology (-removetree <root> <degree>).")
     parser.add_argument('--verbose', action='store_true',
                         help='Print debug information (default: only info and error).')
-    parser.add_argument('--version', action='version', version='Netconf  v1.0.5')
+    parser.add_argument('--version', action='version', version='Netconf  v1.0.6')
 
     return parser.parse_args()
 
