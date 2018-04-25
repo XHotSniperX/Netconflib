@@ -71,7 +71,7 @@ testing=no
                         help="Remove the cluster's tree network topology (-removetree <root> <degree>).")
     parser.add_argument('--verbose', action='store_true',
                         help='Print debug information (default: only info and error).')
-    parser.add_argument('--version', action='version', version='Netconf  v1.0.4')
+    parser.add_argument('--version', action='version', version='Netconf  v1.0.5')
 
     return parser.parse_args()
 
@@ -155,7 +155,10 @@ def main(args=None):
             ncl.configure_tree_topology(root, degree, remove=True)
         elif args.client is not None:
             logging.info("Starting the clients on the cluster...")
-            cmd = Commands.cmd_start_client.format(get_my_ip(), args.client)
+            server_add = get_my_ip()
+            if not ncl.get_server_address() == "automatic":
+                server_add = ncl.get_server_address()
+            cmd = Commands.cmd_start_client.format(server_add, args.client)
             ncl.execute_command_on_all(cmd)
 
 if __name__ == '__main__':
